@@ -1,5 +1,7 @@
 #lang eopl
 
+(provide (all-defined-out))
+
 (require predicates)
 (require "./LoanState.rkt")
 
