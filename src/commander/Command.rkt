@@ -35,5 +35,11 @@
   (close
     (customer-id integer?)  
   )
-
+  (pay-debt
+    (customer-id integer?)
+    (amount integer?)    
+  )
+  (withdraw-loan
+    (customer-id integer?)
+  )
 )
