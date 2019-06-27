@@ -1,7 +1,9 @@
 #lang eopl
 
-; (require "src/blueprints/AccountBlueprint.rkt")
-; (require "src/blueprints/LoanBlueprint.rkt")
+(require predicates)
+(require "./LoanState.rkt")
+
+(define loan-states-list? (all? LoanState?))
 
 (define-datatype Customer Customer?
   (an-account-state
@@ -13,6 +15,8 @@
     (credit-counter integer?)
     (credit integer?)
     (interest-rate integer?)
-    (loans (listof ))
+    (loans loan-states-list?)
+    (minimum-amount integer?)
+    (blocked-money integer?)
   )
 )
