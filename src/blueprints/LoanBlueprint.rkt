@@ -1,5 +1,5 @@
 (define-datatype Loan Loan?
-  (an-loan 
+  (a-loan 
     (amount integer?)
     (blocked-amount integer?)
     (return-span integer?)
