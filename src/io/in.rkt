@@ -43,12 +43,21 @@
   (lambda (raw-commands commands)
     (if (null? raw-commands)
       commands
-      (cond
-        [(regexp-match #rx"Time goes by" 
-          (car raw-commands))
-          (prepare-commands (cdr raw-commands) (append commands (list (time))))]
-
-        [else commands]
+      (let ([command (car raw-commands)])
+        (cond
+          [(regexp-match #rx"Time goes by" command)
+            (prepare-commands (cdr raw-commands) (append commands (list (time))))
+          ]
+          [(regexp-match #px"Customer (\\d+) wants to create an account of type (\\d+). Customer (\\d+) wants to start with (\\d+) Tomans."
+            command)
+              (let ([match (regexp-match #px"Customer (\\d+) wants to create an account of type (\\d+). Customer (\\d+) wants to start with (\\d+) Tomans." command)])
+                (prepare-commands (cdr raw-commands) 
+                  (append commands (list (new-account (string->number (cadr match)) (string->number (caddr match)) (string->number (car (cddddr match))))))
+                )
+              )
+          ]
+          [else (prepare-commands (cdr raw-commands) commands)]
+        )
       )
     )
   )
