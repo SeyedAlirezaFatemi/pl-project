@@ -1,4 +1,8 @@
-(define-datatype Loan Loan?
+#lang eopl
+
+(provide (all-defined-out))
+
+(define-datatype LoanState LoanState?
   (a-loan 
     (amount integer?)
     (blocked-amount integer?)

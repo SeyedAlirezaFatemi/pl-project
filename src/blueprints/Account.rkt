@@ -1,3 +1,7 @@
+#lang eopl
+
+(provide (all-defined-out))
+
 (define-datatype Account Account?
   (an-account 
     (has-interest boolean?)
