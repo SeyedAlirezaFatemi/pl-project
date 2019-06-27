@@ -1,5 +1,5 @@
 #lang racket
 
-(for ([line (file->lines "/home/alireza/Documents/PL/pl-project/src/samples/sample_input.txt")])
+(for ([line (file->lines "../samples/sample_input.txt")])
   (displayln line)
 )
