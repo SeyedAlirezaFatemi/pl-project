@@ -14,22 +14,28 @@
   )
 )
 
-(write (read-file "../samples/sample_input.txt"))
+; phase = 0 => setup
+; phase = 1 => commands
+(define categorize 
+  (lambda (lines phase setup commands)
+    (if (null? lines)
+      (list setup commands)
+      (let ([line (car lines)])  
+        (cond 
+          [(equal? line "commands") (categorize (cdr lines) 1 setup commands)]
+          [(equal? line "setup") (categorize (cdr lines) 0 setup commands)]
+          [else
+            (if (eq? phase 0)
+              (categorize (cdr lines) phase (append setup (list line)) commands)
+              (categorize (cdr lines) phase setup (append commands (list line)))
+            )
+          ]
+        )
+      )
+    )
+  )
+)
 
-; (define handle-input
-;   (lambda ()
-;     (let* ([phase 0]
-;            [account-details '()]
-;            [loan-details '()]
-;            [commands '()])
-;       (for ([line (file->lines "../samples/sample_input.txt")])
-;         (cond )
-;         (if (eq? line "setup") 
-;           (set! phase 1)
-
-;         )
-
-;       )
-;     )
-;   )
-; )
+(let ([lines (read-file "../samples/sample_input.txt")])
+  (write (categorize lines 0 '() '()))
+)
