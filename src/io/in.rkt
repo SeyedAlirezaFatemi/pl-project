@@ -63,6 +63,12 @@
               (analyse-commands rest-raw-commands (append analysed-commands (list (deposit-command (string->number (cadr match)) (string->number (caddr match))))))
             )
           ]
+          ; renewal-command
+          [(regexp-match #px"Customer (\\d+) requests renewal." raw-command) =>
+            (lambda (match)
+              (analyse-commands rest-raw-commands (append analysed-commands (list (renewal-command (string->number (cadr match))))))
+            )
+          ]
 
           [else (analyse-commands (cdr raw-commands) analysed-commands)]
         )
