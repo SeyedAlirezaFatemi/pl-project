@@ -99,6 +99,12 @@
               (analyse-commands rest-raw-commands (append analysed-commands (list (close-command (string->number (cadr match))))))
             )
           ]
+          ; request-loan-command
+          [(regexp-match #px"Customer (\\d+) requests a loan of type (\\d+)." raw-command) =>
+            (lambda (match)
+              (analyse-commands rest-raw-commands (append analysed-commands (list (request-loan-command (string->number (cadr match)) (string->number (caddr match))))))
+            )
+          ]
 
           [else (analyse-commands (cdr raw-commands) analysed-commands)]
         )
