@@ -81,6 +81,12 @@
               (analyse-commands rest-raw-commands (append analysed-commands (list (card-command (string->number (cadr match)) (string->number (caddr match))))))
             )
           ]
+          ; transfer-command
+          [(regexp-match #px"Customer (\\d+) transfers (\\d+) Tomans." raw-command) =>
+            (lambda (match)
+              (analyse-commands rest-raw-commands (append analysed-commands (list (transfer-command (string->number (cadr match)) (string->number (caddr match))))))
+            )
+          ]
 
           [else (analyse-commands (cdr raw-commands) analysed-commands)]
         )
