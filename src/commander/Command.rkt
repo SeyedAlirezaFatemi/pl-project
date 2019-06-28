@@ -35,6 +35,10 @@
   (close-command
     (customer-id integer?)  
   )
+  (request-loan-command
+    (customer-id integer?)
+    (loan-type integer?)
+  )
   (pay-debt-command
     (customer-id integer?)
     (amount integer?)    
