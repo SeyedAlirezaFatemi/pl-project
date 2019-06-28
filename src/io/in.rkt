@@ -87,6 +87,12 @@
               (analyse-commands rest-raw-commands (append analysed-commands (list (transfer-command (string->number (cadr match)) (string->number (caddr match))))))
             )
           ]
+          ; withdraw-command
+          [(regexp-match #px"Customer (\\d+) withdraws (\\d+) Tomans from his account." raw-command) =>
+            (lambda (match)
+              (analyse-commands rest-raw-commands (append analysed-commands (list (withdraw-command (string->number (cadr match)) (string->number (caddr match))))))
+            )
+          ]
 
           [else (analyse-commands (cdr raw-commands) analysed-commands)]
         )
