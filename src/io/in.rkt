@@ -75,6 +75,12 @@
               (analyse-commands rest-raw-commands (append analysed-commands (list (cheque-command (string->number (cadr match)) (string->number (caddr match))))))
             )
           ]
+          ; card-command
+          [(regexp-match #px"Customer (\\d+) spends (\\d+) Tomans via his card." raw-command) =>
+            (lambda (match)
+              (analyse-commands rest-raw-commands (append analysed-commands (list (card-command (string->number (cadr match)) (string->number (caddr match))))))
+            )
+          ]
 
           [else (analyse-commands (cdr raw-commands) analysed-commands)]
         )
