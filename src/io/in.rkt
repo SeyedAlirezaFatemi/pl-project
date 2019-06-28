@@ -69,6 +69,12 @@
               (analyse-commands rest-raw-commands (append analysed-commands (list (renewal-command (string->number (cadr match))))))
             )
           ]
+          ; cheque-command
+          [(regexp-match #px"Customer (\\d+) writes a cheque for (\\d+) Tomans." raw-command) =>
+            (lambda (match)
+              (analyse-commands rest-raw-commands (append analysed-commands (list (cheque-command (string->number (cadr match)) (string->number (caddr match))))))
+            )
+          ]
 
           [else (analyse-commands (cdr raw-commands) analysed-commands)]
         )
