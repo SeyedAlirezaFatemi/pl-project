@@ -105,7 +105,19 @@
               (analyse-commands rest-raw-commands (append analysed-commands (list (request-loan-command (string->number (cadr match)) (string->number (caddr match))))))
             )
           ]
-
+          ; pay-debt-command
+          [(regexp-match #px"Customer (\\d+) pays (\\d+) Tomans of his debt." raw-command) =>
+            (lambda (match)
+              (analyse-commands rest-raw-commands (append analysed-commands (list (pay-debt-command (string->number (cadr match)) (string->number (caddr match))))))
+            )
+          ]
+          ; withdraw-loan-command
+          [(regexp-match #px"Customer (\\d+) withdraws the loan." raw-command) =>
+            (lambda (match)
+              (analyse-commands rest-raw-commands (append analysed-commands (list (withdraw-loan-command (string->number (cadr match))))))
+            )
+          ]
+          ; error
           [else (analyse-commands (cdr raw-commands) analysed-commands)]
         )
       )
