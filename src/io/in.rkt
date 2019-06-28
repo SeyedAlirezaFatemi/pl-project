@@ -39,24 +39,27 @@
   )
 )
 
-(define prepare-commands
-  (lambda (raw-commands commands)
+(define analyse-commands
+  (lambda (raw-commands analysed-commands)
     (if (null? raw-commands)
-      commands
+      analysed-commands
       (let ([command (car raw-commands)])
         (cond
+          
           [(regexp-match #rx"Time goes by" command)
-            (prepare-commands (cdr raw-commands) (append commands (list (time))))
+            (analyse-commands (cdr raw-commands) (append analysed-commands (list (time))))
           ]
-          [(regexp-match #px"Customer (\\d+) wants to create an account of type (\\d+). Customer (\\d+) wants to start with (\\d+) Tomans."
+          
+          [(regexp-match #px"Customer (\\d+) wants to create an account of type (\\d+). Customer [\\d+] wants to start with (\\d+) Tomans."
             command)
-              (let ([match (regexp-match #px"Customer (\\d+) wants to create an account of type (\\d+). Customer (\\d+) wants to start with (\\d+) Tomans." command)])
-                (prepare-commands (cdr raw-commands) 
-                  (append commands (list (new-account (string->number (cadr match)) (string->number (caddr match)) (string->number (car (cddddr match))))))
+              (let ([match (regexp-match #px"Customer (\\d+) wants to create an account of type (\\d+). Customer [\\d+] wants to start with (\\d+) Tomans." command)])
+                (analyse-commands (cdr raw-commands) 
+                  (append analysed-commands (list (new-account (string->number (cadr match)) (string->number (caddr match)) (string->number (cadddr match)))))
                 )
               )
           ]
-          [else (prepare-commands (cdr raw-commands) commands)]
+          
+          [else (analyse-commands (cdr raw-commands) analysed-commands)]
         )
       )
     )
@@ -66,7 +69,7 @@
 (let ([lines (read-file "../samples/sample_input.txt")])
   (define categorized (categorize lines 0 '() '()))
     (let* ([setup (car categorized)]
-           [commands (cadr categorized)])
-      (prepare-commands commands '())      
+           [raw-commands (cadr categorized)])
+      (analyse-commands raw-commands '())      
     )
 )
