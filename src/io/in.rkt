@@ -93,6 +93,12 @@
               (analyse-commands rest-raw-commands (append analysed-commands (list (withdraw-command (string->number (cadr match)) (string->number (caddr match))))))
             )
           ]
+          ; close-command
+          [(regexp-match #px"Customer (\\d+) closes his account." raw-command) =>
+            (lambda (match)
+              (analyse-commands rest-raw-commands (append analysed-commands (list (close-command (string->number (cadr match))))))
+            )
+          ]
 
           [else (analyse-commands (cdr raw-commands) analysed-commands)]
         )
