@@ -43,22 +43,27 @@
   (lambda (raw-commands analysed-commands)
     (if (null? raw-commands)
       analysed-commands
-      (let ([command (car raw-commands)])
+      (let* ([raw-command (car raw-commands)] [rest-raw-commands (cdr raw-commands)])
         (cond
-          
-          [(regexp-match #rx"Time goes by" command)
-            (analyse-commands (cdr raw-commands) (append analysed-commands (list (time))))
+          ; time-command
+          [(regexp-match #rx"Time goes by" raw-command)
+            (analyse-commands rest-raw-commands (append analysed-commands (list (time-command))))
           ]
-          
-          [(regexp-match #px"Customer (\\d+) wants to create an account of type (\\d+). Customer [\\d+] wants to start with (\\d+) Tomans."
-            command)
-              (let ([match (regexp-match #px"Customer (\\d+) wants to create an account of type (\\d+). Customer [\\d+] wants to start with (\\d+) Tomans." command)])
-                (analyse-commands (cdr raw-commands) 
-                  (append analysed-commands (list (new-account (string->number (cadr match)) (string->number (caddr match)) (string->number (cadddr match)))))
-                )
+          ; new-account-command
+          [(regexp-match #px"Customer (\\d+) wants to create an account of type (\\d+). Customer [\\d+] wants to start with (\\d+) Tomans." raw-command) =>
+            (lambda (match)
+              (analyse-commands rest-raw-commands
+                (append analysed-commands (list (new-account-command (string->number (cadr match)) (string->number (caddr match)) (string->number (cadddr match)))))
               )
+            )
           ]
-          
+          ; deposit-command
+          [(regexp-match #px"Customer (\\d+) adds (\\d+) Tomans to his account." raw-command) =>
+            (lambda (match)
+              (analyse-commands rest-raw-commands (append analysed-commands (list (deposit-command (string->number (cadr match)) (string->number (caddr match))))))
+            )
+          ]
+
           [else (analyse-commands (cdr raw-commands) analysed-commands)]
         )
       )

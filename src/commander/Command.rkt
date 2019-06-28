@@ -3,43 +3,43 @@
 (provide (all-defined-out))
 
 (define-datatype Command Command?
-  (time)
-  (new-account 
+  (time-command)
+  (new-account-command
     (customer-id integer?)
     (account-type integer?)
     (inital-balance integer?)
   )
-  (deposit 
+  (deposit-command
     (customer-id integer?)
     (amount integer?)
   )
-  (renewal
+  (renewal-command
     (customer-id integer?)  
   )
-  (cheque
+  (cheque-command
     (customer-id integer?)
     (amount integer?)        
   )
-  (card
+  (card-command
     (customer-id integer?)
     (amount integer?)
   )
-  (transfer
+  (transfer-command
     (customer-id integer?)
     (amount integer?)
   )
-  (withdraw
+  (withdraw-command
     (customer-id integer?)
     (amount integer?)
   )
-  (close
+  (close-command
     (customer-id integer?)  
   )
-  (pay-debt
+  (pay-debt-command
     (customer-id integer?)
     (amount integer?)    
   )
-  (withdraw-loan
+  (withdraw-loan-command
     (customer-id integer?)
   )
 )
