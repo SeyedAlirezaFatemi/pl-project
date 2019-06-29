@@ -7,7 +7,7 @@
     (let* ([loan-types (car input-data)]
            [account-types (cadr input-data)]
            [commands (caddr input-data)])
-      ; We call you here shokri
+      (list loan-types account-types commands)
     )
   )
 )
