@@ -83,7 +83,7 @@
         (a-customer (id type initial-amount amount
                     deadline-month credit-counter credit
                     interest-rate loans minimum-amount blocked-money)
-            (get-account-type type)
+            (get-account-type type account-types)
         )
       )
   )
@@ -125,6 +125,10 @@
   )
 )
 
+(define punish
+  (lambda (customer account) #t
+  )
+)
 
 (define month-number 0)
 
@@ -225,7 +229,46 @@
                 )
             )
         )
-        (cheque-command (customer-id amount) 5
+        (cheque-command (customer-id cheque-amount)
+            (let ([customer (get-customer customer-id customers)])
+                (cases Customer customer
+                    (a-customer (id type initial-amount amount
+                                deadline-month credit-counter credit
+                                interest-rate loans minimum-amount blocked-money)
+                        (let ([account (get-customers-account customer)])
+                           (cases Account account
+                             (an-account  (id has-interest fee minimum-deposit monthly
+                                            period renewable interest-rate credit has-variable-interest
+                                            span-for-increase increase-rate has-cheque has-card transfer-fee)
+                                (if has-cheque
+                                    (if (>= (- amount cheque-amount) minimum-deposit)
+                                        (let ([modified-customer
+                                            (a-customer id type initial-amount
+                                                deadline-month
+                                                (- amount cheque-amount)
+                                                credit-counter credit
+                                                interest-rate loans minimum-amount blocked-money
+                                            )])
+                                          (begin
+                                            (save-customer modified-customer)                              ; LOG
+                                            (display "We have the renewal of customer #")       ; LOG
+                                            (display customer-id)                               ; LOG
+                                            (newline)                                           ; LOG
+                                          )
+                                        )
+                                        (raise 'not-enough-money-for-cheque)
+                                    )
+                                    (begin
+                                        (punish customer account)
+                                        (raise 'not-chequeable!)
+                                    )
+                                )
+                             )
+                           )
+                        )
+                    )
+                )
+            )
         )
         (card-command (customer-id amount) 6
         )
