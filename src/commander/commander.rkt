@@ -77,6 +77,42 @@
   )
 )
 
+(define modify-customer
+  (lambda (customer customer-list)
+      (if (null? customer-list)
+        (error 'customer-not-found-for-save)
+        (let ([customer (car customer-list)])
+          (cases Customer customer
+            (a-customer (id type initial-amount amount
+                        deadline-month credit-counter credit
+                        interest-rate loans minimum-amount blocked-money)
+                (let ([head (car customer-list)])
+                  (cases Customer head
+                    (a-customer (head-id head-type head-initial-amount head-amount
+                                head-deadline-month head-credit-counter head-credit
+                                head-interest-rate head-loans head-minimum-amount head-blocked-money)
+
+                      (if (= head-id id)
+                        (append customer (cdr customer-list))
+                        (modify-customer customer (cdr customer-list))
+                      )
+                    )
+                  )
+                )
+            )
+          )
+        )
+      )
+  )
+)
+
+(define save-customer
+  (lambda (customer)
+    (set! customers (modify-customer customer customers))
+  )
+)
+
+
 (define month-number 0)
 
 (define do-command
@@ -114,7 +150,7 @@
               )
           )
         )
-        (deposit-command (customer-id amount)
+        (deposit-command (customer-id amount) 'tof
         )
         (renewal-command (customer-id) 4
         )
