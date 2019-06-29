@@ -56,7 +56,6 @@
   )
 )
 
-
 (define get-customer
   (lambda (search-id customer-list)
       (if (null? customer-list)
@@ -76,6 +75,20 @@
       )
   )
 )
+
+
+(define get-customers-account
+  (lambda (customer)
+      (cases Customer customer
+        (a-customer (id type initial-amount amount
+                    deadline-month credit-counter credit
+                    interest-rate loans minimum-amount blocked-money)
+            (get-account-type type)
+        )
+      )
+  )
+)
+
 
 (define modify-customer
   (lambda (customer customer-list)
@@ -117,7 +130,7 @@
 
 (define do-command
   (lambda (command)
-    (with-handlers ([symbol? (lambda (exn) exn )])
+    (with-handlers ([symbol? (lambda (exn) (begin(display exn) (newline)))])            ; LOG
       (cases Command command
         (time-command () 1
         )
@@ -151,32 +164,66 @@
           )
         )
         (deposit-command (customer-id add-amount)
-            (begin
-                (let ([customer (get-customer customer-id customers)])
-                    (cases Customer customer
-                        (a-customer (id type initial-amount amount
-                                    deadline-month credit-counter credit
-                                    interest-rate loans minimum-amount blocked-money)
-                            (let ([modified-customer
-                                (a-customer id type initial-amount
-                                    (+ amount add-amount)
-                                    deadline-month credit-counter credit
-                                    interest-rate loans minimum-amount blocked-money
-                                )])
-                              (begin
-                                (save-customer modified-customer)
-                                (display add-amount)                                ; LOG
-                                (display "$ added to the account of customer #")    ; LOG
-                                (display customer-id)                               ; LOG
-                                (newline)                                           ; LOG
-                              )
-                            )
+            (let ([customer (get-customer customer-id customers)])
+                (cases Customer customer
+                    (a-customer (id type initial-amount amount
+                                deadline-month credit-counter credit
+                                interest-rate loans minimum-amount blocked-money)
+                        (let ([modified-customer
+                            (a-customer id type initial-amount
+                                (+ amount add-amount)
+                                deadline-month credit-counter credit
+                                interest-rate loans minimum-amount blocked-money
+                            )])
+                          (begin
+                            (save-customer modified-customer)
+                            (display add-amount)                                ; LOG
+                            (display "$ added to the account of customer #")    ; LOG
+                            (display customer-id)                               ; LOG
+                            (newline)                                           ; LOG
+                          )
                         )
                     )
                 )
             )
         )
-        (renewal-command (customer-id) 4
+        (renewal-command (customer-id)
+            (let ([customer (get-customer customer-id customers)])
+                (cases Customer customer
+                    (a-customer (id type initial-amount amount
+                                deadline-month credit-counter credit
+                                interest-rate loans minimum-amount blocked-money)
+                        (if (>= deadline-month month-number)
+                            (raise 'wait-for-the-deadline)
+                            (let ([account (get-customers-account customer)])
+                               (cases Account account
+                                 (an-account  (id has-interest fee minimum-deposit monthly
+                                                period renewable interest-rate credit has-variable-interest
+                                                span-for-increase increase-rate has-cheque has-card transfer-fee)
+                                    (if renewable
+                                        (let ([modified-customer
+                                            (a-customer id type initial-amount
+                                                amount
+                                                (+ month-number period)
+                                                credit-counter credit
+                                                interest-rate loans minimum-amount blocked-money
+                                            )])
+                                          (begin
+                                            (save-customer modified-customer)                              ; LOG
+                                            (display "We have the renewal of customer #")       ; LOG
+                                            (display customer-id)                               ; LOG
+                                            (newline)                                           ; LOG
+                                          )
+                                        )
+                                        (raise 'not-renewable)
+                                    )
+                                 )
+                               )
+                            )
+                        )
+                    )
+                )
+            )
         )
         (cheque-command (customer-id amount) 5
         )
