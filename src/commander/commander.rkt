@@ -16,6 +16,26 @@
 
 (define customers '() )
 
+(define get-account-type
+  (lambda (search-id account-type-list)
+      (if (null? account-type-list)
+        '()
+        (let ([acc (car account-type-list)])
+          (cases Account acc
+            (an-account  (id has-interest fee minimum-deposit monthly
+                period renewable interest-rate credit has-variable-interest
+                span-for-increase increase-rate has-cheque has-card transfer-fee )
+                (if (= id search-id)
+                  acc
+                  (get-account-type search-id (cdr account-type-list))
+                )
+            )
+          )
+        )
+      )
+  )
+)
+
 (define month-number 0)
 
 (define do-command
@@ -24,8 +44,10 @@
         (time-command () 1
         )
         (new-account-command (customer-id account-type initial-balance)
-            (let ([new-customer (a-customer customer-id account-type initial-balance initial-balance 10 10 0 10 '() 10 10)])
-                (append customers (list new-customer))
+            (let ([new-customer (
+                a-customer customer-id account-type
+                (- initial-balance 1) initial-balance 10 10 0 10 '() 10 10)])
+              (append customers (list new-customer))
             )
         )
         (deposit-command (customer-id amount) 3
@@ -68,6 +90,8 @@
 (define work-on-commands
   (lambda (ls as cs)
     (begin
+      (display 'Started!!)
+      (newline)
       (set! account-types as)
       (set! loan-types ls)
       (set! commands cs)
