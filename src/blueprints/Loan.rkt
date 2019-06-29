@@ -3,7 +3,8 @@
 (provide (all-defined-out))
 
 (define-datatype Loan Loan?
-  (a-loan 
+  (a-loan
+    (id integer?)
     (amount integer?)
     (blocked-amount integer?)
     (return-span integer?)
