@@ -215,4 +215,6 @@ compiled/
 # Ignore all local history of files
 .history
 
+src/result.txt
+
 # End of https://www.gitignore.io/api/racket,jetbrains,jetbrains+all,jetbrains+iml,visualstudiocode
