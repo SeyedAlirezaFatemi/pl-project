@@ -166,6 +166,7 @@
     (with-handlers ([symbol? (lambda (exn) (begin(display exn) (newline)))])            ; LOG
       (cases Command command
         (time-command () 1
+        
         )
         (new-account-command (customer-id account-type initial-balance)
           (let ([acc (get-account-type account-type account-types) ])
