@@ -14,8 +14,7 @@
             begin
             (display 'hey!)
             (newline)
-            (write-customers customers)
-            (finish 4 '())
+            (finish 4 customers)
         )
       )
     )

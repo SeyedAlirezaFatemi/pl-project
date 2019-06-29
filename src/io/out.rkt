@@ -2,6 +2,7 @@
 
 
 (require "../states/Customer.rkt")
+(require "../states/LoanState.rkt")
 (provide (all-defined-out))
 
 (define finish
@@ -72,7 +73,7 @@
 )
 
 (define time->debt
-  (lambda (sepc-time loans)
+  (lambda (spec-time loans)
     (if (null? loans)
       0
       (cases LoanState (car loans)
