@@ -206,11 +206,21 @@
   )
 )
 
-(let ([lines (read-file "../samples/sample_input.txt")])
-  (define categorized (categorize lines 0 '() '()))
-    (let* ([setups (car categorized)]
-           [raw-commands (cadr categorized)])
-      (analyse-commands raw-commands '())
-      (analyse-setups setups 0 '() '() '())    
+(define analyse-input-file
+  (lambda (file-path)
+    (let ([lines (read-file "../samples/sample_input.txt")])
+      (let (categorized (categorize lines 0 '() '()))
+        (let* ([setups (car categorized)]
+              [raw-commands (cadr categorized)])
+          (let* ([commands (analyse-commands raw-commands '())]
+                [configurations (analyse-setups setups 0 '() '() '())])
+            (let* ([loan-types (car configurations)]
+                  [account-types (cadr configurations)])
+              (list loan-types account-types commands)        
+            )
+          )   
+        )
+      )
     )
+  )
 )
