@@ -126,7 +126,36 @@
 )
 
 (define punish
-  (lambda (customer account) #t
+  (lambda (customer account)
+    (cases Customer customer
+        (a-customer (customer-id type initial-amount amount
+                    deadline-month credit-counter credit
+                    interest-rate loans minimum-amount blocked-money)
+            (let ([account (get-customers-account customer)])
+               (cases Account account
+                 (an-account  (id has-interest fee minimum-deposit monthly
+                                period renewable interest-rate account-credit has-variable-interest
+                                span-for-increase increase-rate has-cheque has-card transfer-fee)
+                    (let ([modified-customer
+                        (a-customer id type initial-amount
+                            amount
+                            deadline-month
+                            0
+                            (- credit (/ account-credit 2))
+                            interest-rate loans minimum-amount blocked-money
+                        )])
+                      (begin
+                        (save-customer modified-customer)                              ; LOG
+                        (display "Punishing customer #")       ; LOG
+                        (display customer-id)                               ; LOG
+                        (newline)                                           ; LOG
+                      )
+                    )
+                 )
+               )
+            )
+        )
+    )
   )
 )
 
@@ -251,7 +280,8 @@
                                             )])
                                           (begin
                                             (save-customer modified-customer)                              ; LOG
-                                            (display "We have the renewal of customer #")       ; LOG
+                                            (display cheque-amount)                             ; LOG
+                                            (display "$ is paid by customer #")                ; LOG
                                             (display customer-id)                               ; LOG
                                             (newline)                                           ; LOG
                                           )
