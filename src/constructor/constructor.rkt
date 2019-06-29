@@ -251,6 +251,61 @@
               )
             )
           ]
+          ; loan-type
+          [(regexp-match #px"Loan type (\\d+)" setup) =>
+            (lambda (match)
+              (analyse-setups rest-setups 1 loan-types account-types (append current (list (string->number (cadr match)))))
+            )
+          ]
+          ; loan-amount
+          [(regexp-match #px"loan-amount\\? (\\d+) Tomans" setup) =>
+            (lambda (match)
+              (analyse-setups rest-setups 1 loan-types account-types (append current (list (string->number (cadr match)))))
+            )
+          ]
+          ; loan-blocking-money
+          [(regexp-match #px"blocking-money\\? (\\d+) Tomans" setup) =>
+            (lambda (match)
+              (analyse-setups rest-setups 1 loan-types account-types (append current (list (string->number (cadr match)))))
+            )
+          ]
+          ; loan-return-span
+          [(regexp-match #px"return-span\\? (\\d+) months" setup) =>
+            (lambda (match)
+              (analyse-setups rest-setups 1 loan-types account-types (append current (list (string->number (cadr match)))))
+            )
+          ]
+          ; loan-interst
+          [(regexp-match #px"interest\\? (\\d+) percent" setup) =>
+            (lambda (match)
+              (analyse-setups rest-setups 1 loan-types account-types (append current (list (string->number (cadr match)))))
+            )
+          ]
+          ; loan-last-loan
+          [(regexp-match #px"last-loan\\? (\\d+) months" setup) =>
+            (lambda (match)
+              (analyse-setups rest-setups 1 loan-types account-types (append current (list (string->number (cadr match)))))
+            )
+          ]
+          ; loan-minimum-credit
+          [(regexp-match #px"minimum-credit\\? (\\d+) units" setup) =>
+            (lambda (match)
+              (lambda (match)
+              (let* ([id (car current)]
+                     [amount (not (cadr current))]
+                     [blocked-amount (caddr current)]
+                     [return-span (cadddr current)]
+                     [interest (car (cddddr current))]
+                     [last-loan-span (cadr (cddddr current))]
+                     [minimum-credit (string->number (cadr match))]
+                     )
+                (let ([new-loan (a-loan id amount blocked-amount return-span interest last-loan-span minimum-credit)])
+                  (analyse-setups rest-setups 1 loan-types (cons new-loan loan-types) '())
+                ) 
+              )
+            )
+            )
+          ]
           [else (analyse-setups rest-setups phase loan-types account-types current)]
         )
       )
