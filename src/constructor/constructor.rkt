@@ -3,6 +3,8 @@
 (require "../io/in.rkt")
 (require "../commander/Command.rkt")
 
+(provide analyse-input-file)
+
 ; phase = 0 => setup
 ; phase = 1 => commands
 ; Returns a list with two elements: (setup commands)
