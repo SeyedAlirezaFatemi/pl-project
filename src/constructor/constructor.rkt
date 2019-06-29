@@ -7,17 +7,17 @@
 ; phase = 1 => commands
 ; Returns a list with two elements: (setup commands)
 (define categorize 
-  (lambda (lines phase setup commands)
+  (lambda (lines phase setups commands)
     (if (null? lines)
-      (list setup commands)
+      (list setups commands)
       (let ([line (car lines)])  
         (cond 
-          [(equal? line "commands") (categorize (cdr lines) 1 setup commands)]
-          [(equal? line "setup") (categorize (cdr lines) 0 setup commands)]
+          [(equal? line "commands") (categorize (cdr lines) 1 setups commands)]
+          [(equal? line "setup") (categorize (cdr lines) 0 setups commands)]
           [else
             (if (eq? phase 0)
-              (categorize (cdr lines) phase (append setup (list line)) commands)
-              (categorize (cdr lines) phase setup (append commands (list line)))
+              (categorize (cdr lines) phase (append setups (list line)) commands)
+              (categorize (cdr lines) phase setups (append commands (list line)))
             )
           ]
         )
@@ -112,10 +112,25 @@
   )
 )
 
+; phase = 0 => account
+; phase = 1 => loan 
+(define analyse-setups
+  (lambda (setups phase loan-types account-types current)
+    (if (null? setups)
+      (list loan-types account-types)
+      (let* ([setup (car setups)] [rest-setups (cdr setups)])
+        (cond
+        []
+        )
+      )
+  )
+)
+
 (let ([lines (read-file "../samples/sample_input.txt")])
   (define categorized (categorize lines 0 '() '()))
-    (let* ([setup (car categorized)]
+    (let* ([setups (car categorized)]
            [raw-commands (cadr categorized)])
-      (analyse-commands raw-commands '())      
+      (analyse-commands raw-commands '())
+      (analyse-setups setups '())    
     )
 )
