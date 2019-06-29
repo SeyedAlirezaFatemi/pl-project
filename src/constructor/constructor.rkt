@@ -2,6 +2,7 @@
 
 (require "../io/in.rkt")
 (require "../commander/Command.rkt")
+(require "../blueprints/Account.rkt")
 
 (provide analyse-input-file)
 
@@ -118,6 +119,7 @@
 ; phase = 1 => loan 
 (define analyse-setups
   (lambda (setups phase loan-types account-types current)
+    (write current)
     (if (null? setups)
       (list loan-types account-types)
       (let* ([setup (car setups)] [rest-setups (cdr setups)])
@@ -125,130 +127,148 @@
           ; account-type-setup
           [(regexp-match #px"Account type (\\d+)" setup) =>
             (lambda (match)
-              (analyse-setups rest-setups 0 loan-types account-types (append current (string->number match))
-              )
+              (analyse-setups rest-setups 0 loan-types account-types (append current (list (string->number (cadr match)))))
             )
           ]
           ; account-current-account-setup
           [(regexp-match #px"current-account\\? (true|false)" setup) =>
             (lambda (match)
-              (if (eq? (car match) "true")
-                (analyse-setups rest-setups 0 loan-types account-types (append current (list #t))
-                (analyse-setups rest-setups 0 loan-types account-types (append current (list #f))
+              (if (equal? (cadr match) "true")
+                (analyse-setups rest-setups 0 loan-types account-types (append current (list #t)))
+                (analyse-setups rest-setups 0 loan-types account-types (append current (list #f)))
               )
             )
           ]
           ; account-bank-fee-setup
           [(regexp-match #px"bank-fee\\? (\\d+) Tomans" setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append current (string->number match)))
+              (analyse-setups rest-setups 0 loan-types account-types (append current (list (string->number (cadr match)))))
             )
           ]
           ; account-minimum-deposit-setup
           [(regexp-match #px"minimum-deposit\\? (\\d+) Tomans" setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append current (string->number match)))
+              (analyse-setups rest-setups 0 loan-types account-types (append current (list (string->number (cadr match)))))
             )
           ]
           ; account-monthly-setup
           [(regexp-match #px"monthly\\? (true|false)" setup) =>
             (lambda (match)
-              (if (eq? (car match) "true")
-                (analyse-setups rest-setups 0 loan-types account-types (append current (list #t))
-                (analyse-setups rest-setups 0 loan-types account-types (append current (list #f))
+              (if (equal? (cadr match) "true")
+                (analyse-setups rest-setups 0 loan-types account-types (append current (list #t)))
+                (analyse-setups rest-setups 0 loan-types account-types (append current (list #f)))
               )
             )
           ]
           ; account-period-setup
           [(regexp-match #px"period\\? (\\d+) months" setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append current (string->number match)))
+              (analyse-setups rest-setups 0 loan-types account-types (append current (list (string->number (cadr match)))))
             )
           ]
           ; account-renewable-setup
           [(regexp-match #px"renewable\\? (true|false)" setup) =>
             (lambda (match)
-              (if (eq? (car match) "true")
-                (analyse-setups rest-setups 0 loan-types account-types (append current (list #t))
-                (analyse-setups rest-setups 0 loan-types account-types (append current (list #f))
+              (if (equal? (cadr match) "true")
+                (analyse-setups rest-setups 0 loan-types account-types (append current (list #t)))
+                (analyse-setups rest-setups 0 loan-types account-types (append current (list #f)))
               )
             )
           ]
           ; account-interest-rate-setup
           [(regexp-match #px"interest-rate\\? (\\d+) percent" setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append current (string->number match)))
+              (analyse-setups rest-setups 0 loan-types account-types (append current (list (string->number (cadr match)))))
             )
           ]
           ; account-credit-setup
-          [(regexp-match #px"credit\\? (\\d+) units." setup) =>
+          [(regexp-match #px"credit\\? (\\d+) units" setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append current (string->number match)))
+              (analyse-setups rest-setups 0 loan-types account-types (append current (list (string->number (cadr match)))))
             )
           ]
           ; account-variability-setup
           [(regexp-match #px"variability\\? (true|false)" setup) =>
             (lambda (match)
-              (if (eq? (car match) "true")
-                (analyse-setups rest-setups 0 loan-types account-types (append current (list #t))
-                (analyse-setups rest-setups 0 loan-types account-types (append current (list #f))
+              (if (equal? (cadr match) "true")
+                (analyse-setups rest-setups 0 loan-types account-types (append current (list #t)))
+                (analyse-setups rest-setups 0 loan-types account-types (append current (list #f)))
               )
             )
           ]
           ; account-span-for-increase-setup
           [(regexp-match #px"span-for-increase\\? (\\d+) months" setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append current (string->numbermatch)))
+              (analyse-setups rest-setups 0 loan-types account-types (append current (list (string->number (cadr match)))))
             )
           ]
           ; account-increase-rate-setup
-          [(regexp-match #px"increase-rate\\? (\\f+) percent" setup) =>
+          [(regexp-match #px"increase-rate\\? ([0-9]*\\.?[0-9]*) percent" setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append current (string->number match)))
+              (analyse-setups rest-setups 0 loan-types account-types (append current (list (string->number (cadr match)))))
             )
           ]
           ; account-has-cheque-setup
           [(regexp-match #px"has-cheque\\? (true|false)" setup) =>
             (lambda (match)
-              (if (eq? (car match) "true")
-                (analyse-setups rest-setups 0 loan-types account-types (append current (list #t))
-                (analyse-setups rest-setups 0 loan-types account-types (append current (list #f))
+              (if (equal? (cadr match) "true")
+                (analyse-setups rest-setups 0 loan-types account-types (append current (list #t)))
+                (analyse-setups rest-setups 0 loan-types account-types (append current (list #f)))
               )
             )
           ]
           ; account-has-card-setup
           [(regexp-match #px"has-card\\? (true|false)" setup) =>
             (lambda (match)
-              (if (eq? (car match) "true")
-                (analyse-setups rest-setups 0 loan-types account-types (append current (list #t))
-                (analyse-setups rest-setups 0 loan-types account-types (append current (list #f))
+              (if (equal? (cadr match) "true")
+                (analyse-setups rest-setups 0 loan-types account-types (append current (list #t)))
+                (analyse-setups rest-setups 0 loan-types account-types (append current (list #f)))
               )
             )
           ]
           ; account-transfer-fee-setup
           [(regexp-match #px"transfer-fee\\? (\\d+) Tomans" setup) =>
             (lambda (match)
-              (let (new-account (an-account (append current (string->number (cadr match)))))
-                (analyze-setups rest-setups 0 loan-types (cons account-types new-account `()))
+              (let* ([id (car current)]
+                     [has-interest (not (cadr current))]
+                     [fee (caddr current)]
+                     [minimum-deposit (cadddr current)]
+                     [monthly (car (cddddr current))]
+                     [period (cadr (cddddr current))]
+                     [renewable (caddr (cddddr current))]
+                     [interest-rate (cadddr (cddddr current))]
+                     [credit (car (cddddr (cddddr current)))]
+                     [has-variable-interest (cadr (cddddr (cddddr current)))]
+                     [span-for-increase (caddr (cddddr (cddddr current)))]
+                     [increase-rate (cadddr (cddddr (cddddr current)))]
+                     [has-cheque (car (cddddr (cddddr (cddddr current))))]
+                     [has-card (cadr (cddddr (cddddr (cddddr current))))]
+                     [transfer-fee (string->number (cadr match))]
+                     )
+                (let ([new-account (an-account id has-interest fee minimum-deposit monthly period renewable increase-rate credit has-variable-interest span-for-increase increase-rate has-cheque has-card transfer-fee)])
+                  (analyse-setups rest-setups 0 loan-types (cons new-account account-types) '())
+                ) 
               )
             )
           ]
+          [else (analyse-setups rest-setups phase loan-types account-types current)]
         )
       )
+    )
   )
 )
 
 (define analyse-input-file
   (lambda (file-path)
-    (let ([lines (read-file "../samples/sample_input.txt")])
-      (let (categorized (categorize lines 0 '() '()))
+    (let ([lines (read-file file-path)])
+      (let ([categorized (categorize lines 0 '() '())])
         (let* ([setups (car categorized)]
               [raw-commands (cadr categorized)])
           (let* ([commands (analyse-commands raw-commands '())]
                 [configurations (analyse-setups setups 0 '() '() '())])
             (let* ([loan-types (car configurations)]
-                  [account-types (cadr configurations)])
-              (list loan-types account-types commands)        
+                   [account-types (cadr configurations)])
+              (list loan-types account-types commands)
             )
           )   
         )

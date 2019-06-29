@@ -4,6 +4,7 @@
 
 (define-datatype Account Account?
   (an-account 
+    (id integer?)
     (has-interest boolean?)
     (fee integer?)
     (minimum-deposit integer?) ; For opening new accounts. Checked after subtracting fee.
