@@ -4,6 +4,9 @@
 (require "./io/out.rkt")
 (require "./commander/commander.rkt")
 
+(display 'O_O)
+(newline)
+
 (let ([file-path (read-line (current-input-port) 'any)])
   (let ([input-data (analyse-input-file "samples/sample_input.txt")])
     (let* ([loan-types (car input-data)]

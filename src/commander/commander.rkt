@@ -1,4 +1,4 @@
-#lang eopl
+#lang racket
 
 (provide (all-defined-out))
 (require "../io/in.rkt")
@@ -6,6 +6,7 @@
 (require "../states/Customer.rkt")
 (require "../blueprints/Account.rkt")
 (require "../blueprints/Loan.rkt")
+(require eopl)
 
 (define loan-types (list (a-loan 2 50000000 30000000 24 24 84 625) (a-loan 1 13000000 5000000 48 24 36 875)))
 
@@ -14,12 +15,29 @@
 ;(define commands (list (time-command) (time-command) (time-command) (time-command) (transfer-command 3 100000) (time-command) (deposit-command 3 360000) (new-account-command 1 3 1200000) (time-command) (time-command) (new-account-command 1 1 510000) (time-command) (time-command) (time-command) (time-command) (time-command) (new-account-command 2 1 30000) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (deposit-command 1 2600000) (time-command) (time-command) (time-command) (cheque-command 1 200000) (time-command) (time-command) (time-command) (time-command) (time-command) (renewal-command 1) (time-command) (withdraw-command 1 340000) (time-command) (time-command) (time-command) (request-loan-command 1 2) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (deposit-command 1 1300000) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (request-loan-command 1 1) (withdraw-loan-command 1) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (pay-debt-command 1 1000000)) )
 (define commands (list (time-command)) )
 
+
+;(define exn-test
+;  (lambda ()
+;    (with-handlers ([exn:fail? (lambda (exn) 'discarded)])
+;        (begin
+;        (display 1)
+;        (newline)
+;        (error 'chi!)
+;        (display 2)
+;        (newline))
+;    )
+;   )
+;)
+
+
 (define customers '() )
+
+; (an-account id has-interest fee minimum-deposit monthly period renewable increase-rate credit has-variable-interest span-for-increase increase-rate has-cheque has-card transfer-fee)
 
 (define get-account-type
   (lambda (search-id account-type-list)
       (if (null? account-type-list)
-        '()
+        (begin '())
         (let ([acc (car account-type-list)])
           (cases Account acc
             (an-account  (id has-interest fee minimum-deposit monthly
@@ -40,15 +58,38 @@
 
 (define do-command
   (lambda (command)
-    (cases Command command
+    (with-handlers ([exn:fail? (lambda (exn) 'discarded)])
+      (cases Command command
         (time-command () 1
         )
         (new-account-command (customer-id account-type initial-balance)
-            (let ([new-customer (
-                a-customer customer-id account-type
-                (- initial-balance 1) initial-balance 10 10 0 10 '() 10 10)])
-              (append customers (list new-customer))
-            )
+          (let ([acc (get-account-type account-type account-types) ])
+              (if (null? acc) (error 'account-type-not-found)
+                (cases Account acc (an-account (id has-interest
+                                                        fee minimum-deposit monthly period
+                                                        renewable interest-rate credit
+                                                        has-variable-interest span-for-increase
+                                                        increase-rate has-cheque has-card transfer-fee)
+                  (let ([new-customer (
+                    a-customer customer-id account-type
+                    (- initial-balance fee)         ; => initial-amount
+                    (- initial-balance fee)         ; => amount
+                    (+ month-number period)         ; => deadline-month
+                    0                               ; => credit-counter
+                    0                               ; => credit
+                    interest-rate
+                    '()                             ; => loans
+                    minimum-deposit
+                    0                               ; => blocked-money
+                    )])
+                        (begin
+                        (append customers (list new-customer))
+                        (display 'account-created!)
+                        (newline))
+                  )
+                ))
+              )
+          )
         )
         (deposit-command (customer-id amount) 3
         )
@@ -70,6 +111,7 @@
         )
         (withdraw-loan-command (customer-id) 12
         )
+      )
     )
   )
 )
