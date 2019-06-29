@@ -80,8 +80,7 @@
 (define modify-customer
   (lambda (customer customer-list)
       (if (null? customer-list)
-        (raise 'customer-not-found-for-save)
-        (let ([customer (car customer-list)])
+          (raise 'customer-not-found-for-save)
           (cases Customer customer
             (a-customer (id type initial-amount amount
                         deadline-month credit-counter credit
@@ -93,22 +92,23 @@
                                 head-interest-rate head-loans head-minimum-amount head-blocked-money)
 
                       (if (= head-id id)
-                        (append customer (cdr customer-list))
-                        (modify-customer customer (cdr customer-list))
+                        (cons customer (cdr customer-list))
+                        (cons head (modify-customer customer (cdr customer-list)))
                       )
                     )
                   )
                 )
             )
           )
-        )
       )
   )
 )
 
 (define save-customer
   (lambda (customer)
-    (set! customers (modify-customer customer customers))
+    (begin
+        (set! customers (modify-customer customer customers))
+    )
   )
 )
 
@@ -141,7 +141,7 @@
                     0                               ; => blocked-money
                     )])
                 (begin
-                  (append customers (list new-customer))
+                  (set! customers (cons new-customer customers))
                   (display 'account-created!) ; LOG
                   (newline)                   ; LOG
                 )
@@ -158,10 +158,10 @@
                                     deadline-month credit-counter credit
                                     interest-rate loans minimum-amount blocked-money)
                             (let ([modified-customer
-                                (a-customer (id type initial-amount
+                                (a-customer id type initial-amount
                                     (+ amount add-amount)
                                     deadline-month credit-counter credit
-                                    interest-rate loans minimum-amount blocked-money)
+                                    interest-rate loans minimum-amount blocked-money
                                 )])
                               (begin
                                 (save-customer modified-customer)
@@ -204,8 +204,9 @@
     (if (null? commands)
       customers
       (begin
-        (display (do-command (car commands)))   ; LOG
-        (newline)
+        (do-command (car commands))
+        (display customers)                      ; LOG
+        (newline)                                ; LOG
         (do-commands (cdr commands))
       )
     )
@@ -216,7 +217,6 @@
   (lambda (ls as cs)
     (begin
       (display 'Started!!)                      ; LOG
-      (newline)                                 ; LOG
       (set! account-types as)
       (set! loan-types ls)
       (set! commands cs)
