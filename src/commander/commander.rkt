@@ -273,15 +273,15 @@
                                     (if (>= (- amount cheque-amount) minimum-deposit)
                                         (let ([modified-customer
                                             (a-customer id type initial-amount
-                                                deadline-month
                                                 (- amount cheque-amount)
+                                                deadline-month
                                                 credit-counter credit
                                                 interest-rate loans minimum-amount blocked-money
                                             )])
                                           (begin
-                                            (save-customer modified-customer)                              ; LOG
+                                            (save-customer modified-customer)                   ; LOG
                                             (display cheque-amount)                             ; LOG
-                                            (display "$ is paid by customer #")                ; LOG
+                                            (display "$ is paid by cheque by customer #")       ; LOG
                                             (display customer-id)                               ; LOG
                                             (newline)                                           ; LOG
                                           )
@@ -300,7 +300,47 @@
                 )
             )
         )
-        (card-command (customer-id amount) 6
+        (card-command (customer-id card-amount)
+            (let ([customer (get-customer customer-id customers)])
+                (cases Customer customer
+                    (a-customer (id type initial-amount amount
+                                deadline-month credit-counter credit
+                                interest-rate loans minimum-amount blocked-money)
+                        (let ([account (get-customers-account customer)])
+                           (cases Account account
+                             (an-account  (id has-interest fee minimum-deposit monthly
+                                            period renewable interest-rate credit has-variable-interest
+                                            span-for-increase increase-rate has-cheque has-card transfer-fee)
+                                (if has-card
+                                    (if (>= (- amount card-amount) minimum-deposit)
+                                        (let ([modified-customer
+                                            (a-customer id type initial-amount
+                                                (- amount card-amount)
+                                                deadline-month
+                                                credit-counter credit
+                                                interest-rate loans minimum-amount blocked-money
+                                            )])
+                                          (begin
+                                            (save-customer modified-customer)                   ; LOG
+                                            (display card-amount)                               ; LOG
+                                            (display "$ is paid by card by customer #")         ; LOG
+                                            (display customer-id)                               ; LOG
+                                            (newline)                                           ; LOG
+                                          )
+                                        )
+                                        (raise 'not-enough-money-for-card)
+                                    )
+                                    (begin
+                                        (punish customer account)
+                                        (raise 'not-cardable!)
+                                    )
+                                )
+                             )
+                           )
+                        )
+                    )
+                )
+            )
         )
         (transfer-command (customer-id amount) 7
         )
