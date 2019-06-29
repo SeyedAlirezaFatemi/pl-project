@@ -39,7 +39,7 @@
 (define get-account-type
   (lambda (search-id account-type-list)
       (if (null? account-type-list)
-        (begin '())
+        (begin (raise 'account-not-found))
         (let ([acc (car account-type-list)])
           (cases Account acc
             (an-account  (id has-interest fee minimum-deposit monthly
@@ -60,7 +60,7 @@
 (define get-customer
   (lambda (search-id customer-list)
       (if (null? customer-list)
-        (begin '())
+        (begin (raise 'customer-not-found) )
         (let ([customer (car customer-list)])
           (cases Customer customer
             (a-customer (id type initial-amount amount
@@ -80,7 +80,7 @@
 (define modify-customer
   (lambda (customer customer-list)
       (if (null? customer-list)
-        (error 'customer-not-found-for-save)
+        (raise 'customer-not-found-for-save)
         (let ([customer (car customer-list)])
           (cases Customer customer
             (a-customer (id type initial-amount amount
@@ -117,20 +117,19 @@
 
 (define do-command
   (lambda (command)
-    (with-handlers ([exn:fail? (lambda (exn) 'discarded)])
+    (with-handlers ([symbol? (lambda (exn) exn )])
       (cases Command command
         (time-command () 1
         )
         (new-account-command (customer-id account-type initial-balance)
           (let ([acc (get-account-type account-type account-types) ])
-              (if (null? acc) (error 'account-type-not-found)
-                (cases Account acc (an-account (id has-interest
-                                                        fee minimum-deposit monthly period
-                                                        renewable interest-rate credit
-                                                        has-variable-interest span-for-increase
-                                                        increase-rate has-cheque has-card transfer-fee)
-                  (let ([new-customer (
-                    a-customer customer-id account-type
+            (cases Account acc (an-account (id has-interest
+                                                    fee minimum-deposit monthly period
+                                                    renewable interest-rate credit
+                                                    has-variable-interest span-for-increase
+                                                    increase-rate has-cheque has-card transfer-fee)
+              (let ([new-customer
+                    (a-customer customer-id account-type
                     (- initial-balance fee)         ; => initial-amount
                     (- initial-balance fee)         ; => amount
                     (+ month-number period)         ; => deadline-month
@@ -141,16 +140,41 @@
                     minimum-deposit
                     0                               ; => blocked-money
                     )])
-                        (begin
-                        (append customers (list new-customer))
-                        (display 'account-created!) ; LOG
-                        (newline))                  ; LOG
-                  )
-                ))
+                (begin
+                  (append customers (list new-customer))
+                  (display 'account-created!) ; LOG
+                  (newline)                   ; LOG
+                )
+              )
+            )
               )
           )
         )
-        (deposit-command (customer-id amount) 'tof
+        (deposit-command (customer-id add-amount)
+            (begin
+                (let ([customer (get-customer customer-id customers)])
+                    (cases Customer customer
+                        (a-customer (id type initial-amount amount
+                                    deadline-month credit-counter credit
+                                    interest-rate loans minimum-amount blocked-money)
+                            (let ([modified-customer
+                                (a-customer (id type initial-amount
+                                    (+ amount add-amount)
+                                    deadline-month credit-counter credit
+                                    interest-rate loans minimum-amount blocked-money)
+                                )])
+                              (begin
+                                (save-customer modified-customer)
+                                (display add-amount)                                ; LOG
+                                (display "$ added to the account of customer #")    ; LOG
+                                (display customer-id)                               ; LOG
+                                (newline)                                           ; LOG
+                              )
+                            )
+                        )
+                    )
+                )
+            )
         )
         (renewal-command (customer-id) 4
         )
