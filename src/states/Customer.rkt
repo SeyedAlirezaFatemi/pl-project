@@ -2,13 +2,12 @@
 
 (provide (all-defined-out))
 
-(require predicates)
 (require "./LoanState.rkt")
 
-(define loan-states-list? (all? LoanState?))
+(define loan-states-list? (list? LoanState?))
 
 (define-datatype Customer Customer?
-  (an-account-state
+  (a-customer
     (id integer?)
     (type integer?)
     (initial-amount integer?)
