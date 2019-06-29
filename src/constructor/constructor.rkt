@@ -123,84 +123,114 @@
           ; account-type-setup
           [(regexp-match #px"Account type (\\d+)" setup) =>
             (lambda (match)
-              (analyse-setups rest-setups 0 loan-types account-types (append (string->number(car match)) current)
+              (analyse-setups rest-setups 0 loan-types account-types (append current (string->number match))
               )
             )
           ]
-          ; current-account-setup
+          ; account-current-account-setup
           [(regexp-match #px"current-account? (true|false)" setup) =>
             (lambda (match)
               (if (eq? (car match) "true")
-                (analyse-setups rest-setups 0 loan-types account-types (append #t current))
-                (analyse-setups rest-setups 0 loan-types account-types (append #f current))
+                (analyse-setups rest-setups 0 loan-types account-types (append current #t))
+                (analyse-setups rest-setups 0 loan-types account-types (append current #f))
               )
             )
           ]
-          ; bank-fee-setup
+          ; account-bank-fee-setup
           [(regexp-match #px"bank-fee? (\\d+) Tomans" setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append (string->number(car match)) current))
+              (analyze-setups rest-setups 0 loan-types account-types (append current (string->number match)))
             )
           ]
-          ; minimum-deposit-setup
+          ; account-minimum-deposit-setup
           [(regexp-match #px"minimum-deposit? (\\d+) Tomans" setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append (string->number(car match)) current))
+              (analyze-setups rest-setups 0 loan-types account-types (append current (string->number match)))
             )
           ]
-          ; monthly-setup
+          ; account-monthly-setup
           [(regexp-match #px"monthly? (true|false)" setup) =>
             (lambda (match)
               (if (eq? (car match) "true")
-                (analyze-setups rest-setups 0 loan-types account-types (append #t current))
-                (analyze-setups rest-setups 0 loan-types account-types (append #f current))
+                (analyze-setups rest-setups 0 loan-types account-types (append current #t))
+                (analyze-setups rest-setups 0 loan-types account-types (append current #f))
               )
             )
           ]
-          ; period-setup
+          ; account-period-setup
           [(regexp-match #px"period? (\\d+) months" setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append (string->number(car match)) current))
+              (analyze-setups rest-setups 0 loan-types account-types (append current (string->number match)))
             )
           ]
-          ; renewable-setup
+          ; account-renewable-setup
           [(regexp-match #px"renewable? (true|false)" setup) =>
             (lambda (match)
               (if (eq? (car match) "true")
-                (analyze-setups rest-setups 0 loan-types account-types (append #t current))
-                (analyze-setups rest-setups 0 loan-types account-types (append #f current))
+                (analyze-setups rest-setups 0 loan-types account-types (append current #t))
+                (analyze-setups rest-setups 0 loan-types account-types (append current #f))
               )
             )
           ]
-          ; interest-rate-setup
+          ; account-interest-rate-setup
           [(regexp-match #px"interest-rate? (\\d+) percent" setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append (string->number(car match)) current))
+              (analyze-setups rest-setups 0 loan-types account-types (append current (string->number match)))
             )
           ]
-          ; credit-setup
+          ; account-credit-setup
           [(regexp-match #px"credit? (\\d+) units." setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append (string->number(car match)) current))
+              (analyze-setups rest-setups 0 loan-types account-types (append current (string->number match)))
             )
           ]
-          ; variability-setup
+          ; account-variability-setup
           [(regexp-match #px"variability? (true|false)" setup) =>
             (lambda (match)
               (if (eq? (car match) "true")
-                (analyze-setups rest-setups 0 loan-types account-types (append #t current))
-                (analyze-setups rest-setups 0 loan-types account-types (append #f current))
+                (analyze-setups rest-setups 0 loan-types account-types (append current #t))
+                (analyze-setups rest-setups 0 loan-types account-types (append current #f))
               )
             )
           ]
-          ; span-for-increase-setup
+          ; account-span-for-increase-setup
           [(regexp-match #px"span-for-increase? (\\d+) months" setup) =>
             (lambda (match)
-              (analyze-setups rest-setups 0 loan-types account-types (append (string->number(car match)) current))
+              (analyze-setups rest-setups 0 loan-types account-types (append current (string->numbermatch)))
             )
           ]
-          ; error
-          [else (analyse-commands (cdr raw-commands) analysed-commands)]
+          ; account-increase-rate-setup
+          [(regexp-match #px"increase-rate? (\\f+) percent" setup) =>
+            (lambda (match)
+              (analyze-setups rest-setups 0 loan-types account-types (append current (string->number match)))
+            )
+          ]
+          ; account-has-cheque-setup
+          [(regexp-match #px"has-cheque? (true|false)" setup) =>
+            (lambda (match)
+              (if (eq? (car match) "true")
+                (analyze-setups rest-setups 0 loan-types account-types (append current #t))
+                (analyze-setups rest-setups 0 loan-types account-types (append current #f))
+              )
+            )
+          ]
+          ; account-has-card-setup
+          [(regexp-match #px"has-card? (true|false)" setup) =>
+            (lambda (match)
+              (if (eq? (car match) "true")
+                (analyze-setups rest-setups 0 loan-types account-types (append current #t))
+                (analyze-setups rest-setups 0 loan-types account-types (append current #f))
+              )
+            )
+          ]
+          ; account-transfer-fee-setup
+          [(regexp-match #px"transfer-fee? (\\d+) Tomans" setup) =>
+            (lambda (match)
+              (let (new-account (an-account (append current (string->number match))))
+                (analyze-setups rest-setups 0 loan-types (cons account-types new-account `()))
+              )
+            )
+          ]
         )
       )
   )
