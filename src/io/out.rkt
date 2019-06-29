@@ -23,9 +23,65 @@
           (a-customer (id type initial-amount amount deadline-month credit-counter credit interest-rate loans minimum-amount blocked-money)
             (write id out)
             (write initial-amount out)
-
+            (write amount out)
+            (write deadline-month out)
+            (write credit out)
+            (write interest-rate out)
+            (write (time->debt (latest-loan-time loans) loans) out)
+            (write (latest-loan-time loans) out)
+            (write blocked-money out)
+            ; loan deadline time
+            (write (sum-of-debts loans) out)
             (write-customers (cdr customers) out)
           )
+      )
+    )
+  )
+)
+
+(define sum-of-debts
+  (lambda (loans debts)
+    (if (null? loans)
+      debts
+      (cases LoanState (car loans)
+        (a-loan-state (time type debt)
+          (sum-of-debts (cdr loans) (+ debt debts))
+        )
+      )
+    )
+  )
+)
+
+(define latest-loan-time
+  (lambda (loans)
+    (if (null? loans)
+      0
+      (cases LoanState (car loans)
+        (a-loan-state (time type debt)
+          (if (null? (cdr loans))
+            time
+            (if (> time (latest-loan-time (cdr loans)))
+              time
+              (latest-loan-time (cdr loans))
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+(define time->debt
+  (lambda (sepc-time loans)
+    (if (null? loans)
+      0
+      (cases LoanState (car loans)
+        (a-loan-state (time type debt)
+          (if (equal? spec-time time)
+            debt
+            (time->debt spec-time (cdr loans))
+          )
+        )
       )
     )
   )
