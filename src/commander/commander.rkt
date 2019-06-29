@@ -32,7 +32,9 @@
 
 (define customers '() )
 
-; (an-account id has-interest fee minimum-deposit monthly period renewable increase-rate credit has-variable-interest span-for-increase increase-rate has-cheque has-card transfer-fee)
+; (an-account  (id has-interest fee minimum-deposit monthly
+;                period renewable interest-rate credit has-variable-interest
+;                span-for-increase increase-rate has-cheque has-card transfer-fee ))
 
 (define get-account-type
   (lambda (search-id account-type-list)
@@ -47,6 +49,27 @@
                   acc
                   (get-account-type search-id (cdr account-type-list))
                 )
+            )
+          )
+        )
+      )
+  )
+)
+
+
+(define get-customer
+  (lambda (search-id customer-list)
+      (if (null? customer-list)
+        (begin '())
+        (let ([customer (car customer-list)])
+          (cases Customer customer
+            (a-customer (id type initial-amount amount
+                        deadline-month credit-counter credit
+                        interest-rate loans minimum-amount blocked-money)
+              (if (= id search-id)
+                customer
+                (get-customer search-id (cdr customer-list))
+              )
             )
           )
         )
@@ -84,14 +107,14 @@
                     )])
                         (begin
                         (append customers (list new-customer))
-                        (display 'account-created!)
-                        (newline))
+                        (display 'account-created!) ; LOG
+                        (newline))                  ; LOG
                   )
                 ))
               )
           )
         )
-        (deposit-command (customer-id amount) 3
+        (deposit-command (customer-id amount)
         )
         (renewal-command (customer-id) 4
         )
@@ -121,7 +144,7 @@
     (if (null? commands)
       customers
       (begin
-        (display (do-command (car commands)))
+        (display (do-command (car commands)))   ; LOG
         (newline)
         (do-commands (cdr commands))
       )
@@ -132,8 +155,8 @@
 (define work-on-commands
   (lambda (ls as cs)
     (begin
-      (display 'Started!!)
-      (newline)
+      (display 'Started!!)                      ; LOG
+      (newline)                                 ; LOG
       (set! account-types as)
       (set! loan-types ls)
       (set! commands cs)
