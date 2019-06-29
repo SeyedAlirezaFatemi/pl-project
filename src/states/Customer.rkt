@@ -1,10 +1,10 @@
 #lang eopl
 
 (provide (all-defined-out))
-
+(require predicates)
 (require "./LoanState.rkt")
 
-(define loan-states-list? (list? LoanState?))
+(define loan-states-list? (all? LoanState?))
 
 (define-datatype Customer Customer?
   (a-customer

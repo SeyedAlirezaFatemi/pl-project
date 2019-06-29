@@ -7,9 +7,6 @@
 (require "../blueprints/Account.rkt")
 (require "../blueprints/Loan.rkt")
 
-; (require racket/lazy-require)
-; (lazy-require ["../constructor/constructor.rkt" (loan-types)])
-
 (define loan-types (list (a-loan 2 50000000 30000000 24 24 84 625) (a-loan 1 13000000 5000000 48 24 36 875)))
 
 (define account-types (list (an-account 1 #t 10000 200000 #t 72 #t 1 250 #t 20 1 #f #t 500)) )
@@ -28,7 +25,7 @@
         )
         (new-account-command (customer-id account-type initial-balance)
             (let ([new-customer (a-customer customer-id account-type initial-balance initial-balance 10 10 0 10 '() 10 10)])
-                (append new-customer customers)
+                (append customers (list new-customer))
             )
         )
         (deposit-command (customer-id amount) 3
@@ -59,8 +56,7 @@
   (lambda (commands)
     (if (null? commands)
       customers
-      (
-        begin
+      (begin
         (display (do-command (car commands)))
         (newline)
         (do-commands (cdr commands))
@@ -71,8 +67,7 @@
 
 (define work-on-commands
   (lambda (ls as cs)
-    (
-      begin
+    (begin
       (set! account-types as)
       (set! loan-types ls)
       (set! commands cs)
@@ -80,5 +75,3 @@
     )
   )
 )
-
-; (define )
