@@ -20,7 +20,7 @@
     (if (null? customers) 
       out
       (cases Customer (car customers)
-          (an-account-state (id type initial-amount amount deadline-month credit-counter credit interest-rate loans minimum-amount blocked-money)
+          (a-customer (id type initial-amount amount deadline-month credit-counter credit interest-rate loans minimum-amount blocked-money)
             (write id out)
             (write initial-amount out)
 

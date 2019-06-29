@@ -10,9 +10,9 @@
 ; (require racket/lazy-require)
 ; (lazy-require ["../constructor/constructor.rkt" (loan-types)])
 
-(define loan-states (list (a-loan 2 50000000 30000000 24 24 84 625) (a-loan 1 13000000 5000000 48 24 36 875)))
+(define loan-types (list (a-loan 2 50000000 30000000 24 24 84 625) (a-loan 1 13000000 5000000 48 24 36 875)))
 
-(define account-states (list (an-account 1 #t 10000 200000 #t 72 #t 1 250 #t 20 1 #f #t 500)) )
+(define account-types (list (an-account 1 #t 10000 200000 #t 72 #t 1 250 #t 20 1 #f #t 500)) )
 
 ;(define commands (list (time-command) (time-command) (time-command) (time-command) (transfer-command 3 100000) (time-command) (deposit-command 3 360000) (new-account-command 1 3 1200000) (time-command) (time-command) (new-account-command 1 1 510000) (time-command) (time-command) (time-command) (time-command) (time-command) (new-account-command 2 1 30000) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (deposit-command 1 2600000) (time-command) (time-command) (time-command) (cheque-command 1 200000) (time-command) (time-command) (time-command) (time-command) (time-command) (renewal-command 1) (time-command) (withdraw-command 1 340000) (time-command) (time-command) (time-command) (request-loan-command 1 2) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (deposit-command 1 1300000) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (request-loan-command 1 1) (withdraw-loan-command 1) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (time-command) (pay-debt-command 1 1000000)) )
 (define commands (list (time-command)) )
@@ -69,9 +69,16 @@
   )
 )
 
-(display customers)
-(newline)
-(display (do-commands commands))
-(newline)
+(define work-on-commands
+  (lambda (ls as cs)
+    (
+      begin
+      (set! account-types as)
+      (set! loan-types ls)
+      (set! commands cs)
+      (do-commands commands)
+    )
+  )
+)
 
 ; (define )
