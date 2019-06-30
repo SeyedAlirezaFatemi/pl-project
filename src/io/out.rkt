@@ -1,6 +1,5 @@
 #lang eopl
 
-
 (require "../states/Customer.rkt")
 (require "../states/LoanState.rkt")
 (provide (all-defined-out))
