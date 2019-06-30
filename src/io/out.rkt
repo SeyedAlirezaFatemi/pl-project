@@ -6,7 +6,7 @@
 
 (define finish
   (lambda (last-month customers)
-    (let ([out (open-output-file "result.txt")])
+    (let ([out (open-output-file "result.txt" #:exists 'replace)])
       (write last-month out)
       (newline out)
       (write-customers customers out)
