@@ -117,6 +117,27 @@
   )
 )
 
+(define delete-customer
+  (lambda (search-id customer-list)
+      (if (null? customer-list)
+        (raise 'customer-not-found-for-deletion)
+        (let ([head (car customer-list)])
+          (cases Customer head
+            (a-customer (head-id head-type head-initial-amount head-amount
+                        head-deadline-month head-credit-counter head-credit
+                        head-interest-rate head-loans head-minimum-amount head-blocked-money)
+
+              (if (= head-id search-id)
+                (cdr customer-list)
+                (cons head (delete-customer search-id (cdr customer-list)))
+              )
+            )
+          )
+        )
+      )
+  )
+)
+
 (define save-customer
   (lambda (customer)
     (begin
@@ -145,8 +166,8 @@
                             interest-rate loans minimum-amount blocked-money
                         )])
                       (begin
-                        (save-customer modified-customer)                              ; LOG
-                        (display "Punishing customer #")       ; LOG
+                        (save-customer modified-customer)                   ; LOG
+                        (display "Punishing customer #")                    ; LOG
                         (display customer-id)                               ; LOG
                         (newline)                                           ; LOG
                       )
@@ -163,7 +184,7 @@
 
 (define do-command
   (lambda (command)
-    (with-handlers ([symbol? (lambda (exn) (begin(display exn) (newline)))])            ; LOG
+    (with-handlers ([symbol? (lambda (exn) (begin (display "Exception: ") (display exn) (newline)))])     ; LOG
       (cases Command command
         (time-command ()
           (set! month-number (+ month-number 1))
@@ -193,8 +214,7 @@
                   (newline)                   ; LOG
                 )
               )
-            )
-              )
+            ))
           )
         )
         (deposit-command (customer-id add-amount)
@@ -343,7 +363,7 @@
                 )
             )
         )
-        (transfer-command (customer-id amount) 7
+        (transfer-command (customer-id transfer-amount) 7
             (let ([customer (get-customer customer-id customers)])
                 (cases Customer customer
                     (a-customer (id type initial-amount amount
@@ -355,27 +375,27 @@
                                             period renewable interest-rate credit has-variable-interest
                                             span-for-increase increase-rate has-cheque has-card transfer-fee)
                                 (if has-card
-                                    (if (>= (- amount card-amount) minimum-deposit)
+                                    (if (>= (- amount transfer-amount) minimum-deposit)
                                         (let ([modified-customer
                                             (a-customer id type initial-amount
-                                                (- amount card-amount)
+                                                (- amount transfer-amount)
                                                 deadline-month
                                                 credit-counter credit
                                                 interest-rate loans minimum-amount blocked-money
                                             )])
                                           (begin
                                             (save-customer modified-customer)                   ; LOG
-                                            (display card-amount)                               ; LOG
-                                            (display "$ is paid by card by customer #")         ; LOG
+                                            (display transfer-amount)                               ; LOG
+                                            (display "$ is paid by transfer command by customer #")         ; LOG
                                             (display customer-id)                               ; LOG
                                             (newline)                                           ; LOG
                                           )
                                         )
-                                        (raise 'not-enough-money-for-card)
+                                        (raise 'not-enough-money-for-transfer)
                                     )
                                     (begin
                                         (punish customer account)
-                                        (raise 'not-cardable!)
+                                        (raise 'not-transferable!)
                                     )
                                 )
                              )
@@ -385,7 +405,7 @@
                 )
             )
         )
-        (withdraw-command (customer-id amount)
+        (withdraw-command (customer-id withdraw-amount)
             (let ([customer (get-customer customer-id customers)])
                 (cases Customer customer
                     (a-customer (id type initial-amount amount
@@ -397,27 +417,27 @@
                                             period renewable interest-rate credit has-variable-interest
                                             span-for-increase increase-rate has-cheque has-card transfer-fee)
                                 (if has-card
-                                    (if (>= (- amount card-amount) minimum-deposit)
+                                    (if (>= (- amount withdraw-amount) minimum-deposit)
                                         (let ([modified-customer
                                             (a-customer id type initial-amount
-                                                (- amount card-amount)
+                                                (- amount withdraw-amount)
                                                 deadline-month
                                                 credit-counter credit
                                                 interest-rate loans minimum-amount blocked-money
                                             )])
                                           (begin
                                             (save-customer modified-customer)                   ; LOG
-                                            (display card-amount)                               ; LOG
-                                            (display "$ is paid by card by customer #")         ; LOG
+                                            (display withdraw-amount)                               ; LOG
+                                            (display "$ is paid by withdraw command by customer #")         ; LOG
                                             (display customer-id)                               ; LOG
                                             (newline)                                           ; LOG
                                           )
                                         )
-                                        (raise 'not-enough-money-for-card)
+                                        (raise 'not-enough-money-for-withdraw)
                                     )
                                     (begin
                                         (punish customer account)
-                                        (raise 'not-cardable!)
+                                        (raise 'not-withdrawable!)
                                     )
                                 )
                              )
@@ -427,7 +447,8 @@
                 )
             )
         )
-        (close-command (customer-id) 9
+        (close-command (customer-id)
+            (set! customers (delete-customer customer-id customers))
         )
         (request-loan-command (customer-id loan-type) 10
         )
