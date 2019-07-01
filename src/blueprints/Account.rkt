@@ -26,7 +26,9 @@
 (define has-interest? 
   (lambda (account-type)
     (cases Account account-type
-      (a-customer (id type initial-amount amount deadline-month credit-counter credit interest-rate loans minimum-amount blocked-money)
+      (an-account  (id has-interest fee minimum-deposit monthly
+                    period renewable interest-rate credit has-variable-interest
+                    span-for-increase increase-rate has-cheque has-card transfer-fee)
         has-interest
       )
     )

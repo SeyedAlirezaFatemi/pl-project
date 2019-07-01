@@ -1,6 +1,7 @@
 #lang eopl
 
 (require "../states/Customer.rkt")
+(require "../blueprints/Account.rkt")
 (require "../states/LoanState.rkt")
 (require "../commander/commander.rkt")
 (provide (all-defined-out))
@@ -27,7 +28,7 @@
             (write amount out)
             (write deadline-month out)
             (write credit out)
-            (if (has-interest (get-account-type type account-types))
+            (if (has-interest? (get-account-type type account-types))
               (write 0 out)
               (write interest-rate out)
             )
@@ -64,9 +65,11 @@
         (a-loan-state (time type debt)
           (if (null? (cdr loans))
             time
-            (if (> time (latest-loan-time (cdr loans)))
-              time
-              (latest-loan-time (cdr loans))
+            (let ([rest-time (latest-loan-time (cdr loans))])
+              (if (> time rest-time)
+                time
+                rest-time
+              )
             )
           )
         )
