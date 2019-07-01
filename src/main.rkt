@@ -6,7 +6,7 @@
 (require racket/pretty)
 
 (let ([file-path (read-line (current-input-port) 'any)])
-  (let ([input-data (analyse-input-file "samples/sample_input.txt")])
+  (let ([input-data (analyse-input-file "samples/sample_input-2.txt")])
     (pretty-display "File read successfully!")
     (let* ([loan-types (car input-data)]
            [account-types (cadr input-data)]
