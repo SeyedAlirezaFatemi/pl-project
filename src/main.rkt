@@ -21,7 +21,7 @@
         (
             begin
             (pretty-display customers)
-            (finish 4 customers)
+            (finish 4 account-types customers)
         )
       )
     )

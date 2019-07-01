@@ -22,3 +22,13 @@
     (transfer-fee integer?)     
   )
 )
+
+(define has-interest? 
+  (lambda (account-type)
+    (cases Account account-type
+      (a-customer (id type initial-amount amount deadline-month credit-counter credit interest-rate loans minimum-amount blocked-money)
+        has-interest
+      )
+    )
+  ) 
+)

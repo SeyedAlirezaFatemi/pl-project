@@ -2,10 +2,11 @@
 
 (require "../states/Customer.rkt")
 (require "../states/LoanState.rkt")
+(require "../commander/commander.rkt")
 (provide (all-defined-out))
 
 (define finish
-  (lambda (last-month customers)
+  (lambda (last-month account-types customers)
     (let ([out (open-output-file "result.txt" #:exists 'replace)])
       (write last-month out)
       (newline out)
@@ -16,7 +17,7 @@
 )
 
 (define write-customers
-  (lambda (customers out)
+  (lambda (account-types customers out)
     (if (null? customers) 
       out
       (cases Customer (car customers)
@@ -26,7 +27,10 @@
             (write amount out)
             (write deadline-month out)
             (write credit out)
-            (write interest-rate out)
+            (if (has-interest (get-account-type type account-types))
+              (write 0 out)
+              (write interest-rate out)
+            )
             (write (time->debt (latest-loan-time loans) loans) out)
             (write (latest-loan-time loans) out)
             (write blocked-money out)
