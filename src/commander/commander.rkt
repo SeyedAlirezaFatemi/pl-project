@@ -343,213 +343,213 @@
           )
         )
         (renewal-command (customer-id)
-            (let ([customer (get-customer customer-id customers)])
-                (cases Customer customer
-                    (a-customer (id type initial-amount amount
-                                deadline-month credit-counter credit
-                                interest-rate loans minimum-amount blocked-money)
-                        (if (>= deadline-month month-number)
-                            (raise 'wait-for-the-deadline)
-                            (let ([account (get-customers-account customer)])
-                               (cases Account account
-                                 (an-account  (id has-interest fee minimum-deposit monthly
-                                                period renewable interest-rate credit has-variable-interest
-                                                span-for-increase increase-rate has-cheque has-card transfer-fee)
-                                    (if renewable
-                                        (let ([modified-customer
-                                            (a-customer id type initial-amount
-                                                amount
-                                                (+ month-number period)
-                                                credit-counter credit
-                                                interest-rate loans minimum-amount blocked-money
-                                            )])
-                                          (begin
-                                            (save-customer modified-customer)                              ; LOG
-                                            (pretty-display "We have the renewal of customer #")       ; LOG
-                                            (pretty-display customer-id)                               ; LOG
-                                            (newline)                                           ; LOG
-                                          )
-                                        )
-                                        (raise 'not-renewable)
-                                    )
-                                 )
-                               )
+          (let ([customer (get-customer customer-id customers)])
+            (cases Customer customer
+              (a-customer (id type initial-amount amount
+                          deadline-month credit-counter credit
+                          interest-rate loans minimum-amount blocked-money)
+                (if (>= deadline-month month-number)
+                  (raise 'wait-for-the-deadline)
+                  (let ([account (get-customers-account customer)])
+                    (cases Account account
+                      (an-account  (id has-interest fee minimum-deposit monthly
+                                    period renewable interest-rate credit has-variable-interest
+                                    span-for-increase increase-rate has-cheque has-card transfer-fee)
+                        (if renewable
+                          (let ([modified-customer
+                            (a-customer id type initial-amount
+                                        amount
+                                        (+ month-number period)
+                                        credit-counter credit
+                                        interest-rate loans minimum-amount blocked-money
+                            )])
+                            (begin
+                              (save-customer modified-customer)                              ; LOG
+                              (pretty-display "We have the renewal of customer #")       ; LOG
+                              (pretty-display customer-id)                               ; LOG
+                              (newline)                                           ; LOG
                             )
+                          )
+                          (raise 'not-renewable)
                         )
+                      )
                     )
+                  )
                 )
+              )
             )
+          )
         )
         (cheque-command (customer-id cheque-amount)
-            (let ([customer (get-customer customer-id customers)])
-                (cases Customer customer
-                    (a-customer (id type initial-amount amount
-                                deadline-month credit-counter credit
-                                interest-rate loans minimum-amount blocked-money)
-                        (let ([account (get-customers-account customer)])
-                           (cases Account account
-                             (an-account  (id has-interest fee minimum-deposit monthly
-                                            period renewable interest-rate credit has-variable-interest
-                                            span-for-increase increase-rate has-cheque has-card transfer-fee)
-                                (if has-cheque
-                                    (if (>= (- amount cheque-amount) minimum-deposit)
-                                        (let ([modified-customer
-                                            (a-customer id type initial-amount
-                                                (- amount cheque-amount)
-                                                deadline-month
-                                                credit-counter credit
-                                                interest-rate loans minimum-amount blocked-money
-                                            )])
-                                          (begin
-                                            (save-customer modified-customer)                   ; LOG
-                                            (pretty-display cheque-amount)                             ; LOG
-                                            (pretty-display "$ is paid by cheque by customer #")       ; LOG
-                                            (pretty-display customer-id)                               ; LOG
-                                            (newline)                                           ; LOG
-                                          )
-                                        )
-                                        (raise 'not-enough-money-for-cheque)
-                                    )
-                                    (begin
-                                        (punish customer account)
-                                        (raise 'not-chequeable!)
-                                    )
-                                )
-                             )
-                           )
+          (let ([customer (get-customer customer-id customers)])
+            (cases Customer customer
+              (a-customer (id type initial-amount amount
+                          deadline-month credit-counter credit
+                          interest-rate loans minimum-amount blocked-money)
+                (let ([account (get-customers-account customer)])
+                  (cases Account account
+                    (an-account  (id has-interest fee minimum-deposit monthly
+                                  period renewable interest-rate credit has-variable-interest
+                                  span-for-increase increase-rate has-cheque has-card transfer-fee)
+                      (if has-cheque
+                        (if (>= (- amount cheque-amount) minimum-deposit)
+                          (let ([modified-customer
+                            (a-customer id type initial-amount
+                                        (- amount cheque-amount)
+                                        deadline-month
+                                        credit-counter credit
+                                        interest-rate loans minimum-amount blocked-money
+                            )])
+                            (begin
+                              (save-customer modified-customer)                   ; LOG
+                              (pretty-display cheque-amount)                             ; LOG
+                              (pretty-display "$ is paid by cheque by customer #")       ; LOG
+                              (pretty-display customer-id)                               ; LOG
+                              (newline)                                           ; LOG
+                            )
+                          )
+                          (raise 'not-enough-money-for-cheque)
                         )
+                        (begin
+                          (punish customer account)
+                          (raise 'not-chequeable!)
+                        )
+                      )
                     )
+                  )
                 )
+              )
             )
+          )
         )
         (card-command (customer-id card-amount)
-            (let ([customer (get-customer customer-id customers)])
-                (cases Customer customer
-                    (a-customer (id type initial-amount amount
-                                deadline-month credit-counter credit
-                                interest-rate loans minimum-amount blocked-money)
-                        (let ([account (get-customers-account customer)])
-                           (cases Account account
-                             (an-account  (id has-interest fee minimum-deposit monthly
-                                            period renewable interest-rate credit has-variable-interest
-                                            span-for-increase increase-rate has-cheque has-card transfer-fee)
-                                (if has-card
-                                    (if (>= (- amount card-amount) minimum-deposit)
-                                        (let ([modified-customer
-                                            (a-customer id type initial-amount
-                                                (- amount card-amount)
-                                                deadline-month
-                                                credit-counter credit
-                                                interest-rate loans minimum-amount blocked-money
-                                            )])
-                                          (begin
-                                            (save-customer modified-customer)                   ; LOG
-                                            (pretty-display card-amount)                               ; LOG
-                                            (pretty-display "$ is paid by card by customer #")         ; LOG
-                                            (pretty-display customer-id)                               ; LOG
-                                            (newline)                                           ; LOG
-                                          )
-                                        )
-                                        (raise 'not-enough-money-for-card)
-                                    )
-                                    (begin
-                                        (punish customer account)
-                                        (raise 'not-cardable!)
-                                    )
-                                )
-                             )
-                           )
+          (let ([customer (get-customer customer-id customers)])
+            (cases Customer customer
+              (a-customer (id type initial-amount amount
+                          deadline-month credit-counter credit
+                          interest-rate loans minimum-amount blocked-money)
+                (let ([account (get-customers-account customer)])
+                  (cases Account account
+                    (an-account  (id has-interest fee minimum-deposit monthly
+                                  period renewable interest-rate credit has-variable-interest
+                                  span-for-increase increase-rate has-cheque has-card transfer-fee)
+                      (if has-card
+                        (if (>= (- amount card-amount) minimum-deposit)
+                          (let ([modified-customer
+                            (a-customer id type initial-amount
+                                        (- amount card-amount)
+                                        deadline-month
+                                        credit-counter credit
+                                        interest-rate loans minimum-amount blocked-money
+                            )])
+                              (begin
+                                (save-customer modified-customer)                   ; LOG
+                                (pretty-display card-amount)                               ; LOG
+                                (pretty-display "$ is paid by card by customer #")         ; LOG
+                                (pretty-display customer-id)                               ; LOG
+                                (newline)                                           ; LOG
+                              )
+                          )
+                          (raise 'not-enough-money-for-card)
                         )
+                        (begin
+                          (punish customer account)
+                          (raise 'not-cardable!)
+                        )
+                      )
                     )
+                  )
                 )
+              )
             )
+          )
         )
         (transfer-command (customer-id transfer-amount) 7
-            (let ([customer (get-customer customer-id customers)])
-                (cases Customer customer
-                    (a-customer (id type initial-amount amount
-                                deadline-month credit-counter credit
-                                interest-rate loans minimum-amount blocked-money)
-                        (let ([account (get-customers-account customer)])
-                           (cases Account account
-                             (an-account  (id has-interest fee minimum-deposit monthly
-                                            period renewable interest-rate credit has-variable-interest
-                                            span-for-increase increase-rate has-cheque has-card transfer-fee)
-                                (if has-card
-                                    (if (>= (- amount transfer-amount) minimum-deposit)
-                                        (let ([modified-customer
-                                            (a-customer id type initial-amount
-                                                (- amount transfer-amount)
-                                                deadline-month
-                                                credit-counter credit
-                                                interest-rate loans minimum-amount blocked-money
-                                            )])
-                                          (begin
-                                            (save-customer modified-customer)                                ; LOG
-                                            (pretty-display transfer-amount)                                        ; LOG
-                                            (pretty-display "$ is paid by transfer command by customer #")          ; LOG
-                                            (pretty-display customer-id)                                            ; LOG
-                                            (newline)                                                        ; LOG
-                                          )
-                                        )
-                                        (raise 'not-enough-money-for-transfer)
-                                    )
-                                    (begin
-                                        (punish customer account)
-                                        (raise 'not-transferable!)
-                                    )
-                                )
-                             )
-                           )
+          (let ([customer (get-customer customer-id customers)])
+            (cases Customer customer
+              (a-customer (id type initial-amount amount
+                          deadline-month credit-counter credit
+                          interest-rate loans minimum-amount blocked-money)
+                (let ([account (get-customers-account customer)])
+                  (cases Account account
+                    (an-account  (id has-interest fee minimum-deposit monthly
+                                  period renewable interest-rate credit has-variable-interest
+                                  span-for-increase increase-rate has-cheque has-card transfer-fee)
+                      (if has-card
+                        (if (>= (- amount transfer-amount) minimum-deposit)
+                          (let ([modified-customer
+                            (a-customer id type initial-amount
+                                        (- amount transfer-amount)
+                                        deadline-month
+                                        credit-counter credit
+                                        interest-rate loans minimum-amount blocked-money
+                            )])
+                            (begin
+                              (save-customer modified-customer)                                ; LOG
+                              (pretty-display transfer-amount)                                        ; LOG
+                              (pretty-display "$ is paid by transfer command by customer #")          ; LOG
+                              (pretty-display customer-id)                                            ; LOG
+                              (newline)                                                        ; LOG
+                            )
+                          )
+                          (raise 'not-enough-money-for-transfer)
                         )
+                        (begin
+                          (punish customer account)
+                          (raise 'not-transferable!)
+                        )
+                      )
                     )
+                  )
                 )
+              )
             )
+          )
         )
         (withdraw-command (customer-id withdraw-amount)
-            (let ([customer (get-customer customer-id customers)])
-                (cases Customer customer
-                    (a-customer (id type initial-amount amount
-                                deadline-month credit-counter credit
-                                interest-rate loans minimum-amount blocked-money)
-                        (let ([account (get-customers-account customer)])
-                           (cases Account account
-                             (an-account  (id has-interest fee minimum-deposit monthly
-                                            period renewable interest-rate credit has-variable-interest
-                                            span-for-increase increase-rate has-cheque has-card transfer-fee)
-                                (if has-card
-                                    (if (>= (- amount withdraw-amount) minimum-deposit)
-                                        (let ([modified-customer
-                                            (a-customer id type initial-amount
-                                                (- amount withdraw-amount)
-                                                deadline-month
-                                                credit-counter credit
-                                                interest-rate loans minimum-amount blocked-money
-                                            )])
-                                          (begin
-                                            (save-customer modified-customer)                   ; LOG
-                                            (pretty-display withdraw-amount)                               ; LOG
-                                            (pretty-display "$ is paid by withdraw command by customer #")         ; LOG
-                                            (pretty-display customer-id)                               ; LOG
-                                            (newline)                                           ; LOG
-                                          )
-                                        )
-                                        (raise 'not-enough-money-for-withdraw)
-                                    )
-                                    (begin
-                                        (punish customer account)
-                                        (raise 'not-withdrawable!)
-                                    )
-                                )
-                             )
-                           )
+          (let ([customer (get-customer customer-id customers)])
+            (cases Customer customer
+              (a-customer (id type initial-amount amount
+                          deadline-month credit-counter credit
+                          interest-rate loans minimum-amount blocked-money)
+                (let ([account (get-customers-account customer)])
+                  (cases Account account
+                    (an-account  (id has-interest fee minimum-deposit monthly
+                                  period renewable interest-rate credit has-variable-interest
+                                  span-for-increase increase-rate has-cheque has-card transfer-fee)
+                      (if has-card
+                        (if (>= (- amount withdraw-amount) minimum-deposit)
+                          (let ([modified-customer
+                            (a-customer id type initial-amount
+                                        (- amount withdraw-amount)
+                                        deadline-month
+                                        credit-counter credit
+                                        interest-rate loans minimum-amount blocked-money
+                            )])
+                            (begin
+                              (save-customer modified-customer)                   ; LOG
+                              (pretty-display withdraw-amount)                               ; LOG
+                              (pretty-display "$ is paid by withdraw command by customer #")         ; LOG
+                              (pretty-display customer-id)                               ; LOG
+                              (newline)                                           ; LOG
+                            )
+                          )
+                          (raise 'not-enough-money-for-withdraw)
                         )
+                        (begin
+                          (punish customer account)
+                          (raise 'not-withdrawable!)
+                        )
+                      )
                     )
+                  )
                 )
+              )
             )
+          )
         )
         (close-command (customer-id)
-            (set! customers (delete-customer customer-id customers))
+          (set! customers (delete-customer customer-id customers))
         )
         (request-loan-command (customer-id loan-type) 
           (let* ([customer (get-customer customer-id customers)]
@@ -594,29 +594,29 @@
                       )])
                       (let ([latest-loan (latest-loan loans)])
                         (cases LoanState latest-loan
-                            (a-loan-state (time type debt is-withdrawn)
-                              (if (>= debt amount)
-                                (let* ([modified-loan
-                                  (a-loan-state time type (- debt amount) is-withdrawn)]
-                                  [extra (- amount debt)]
-                                  [modified-loan-2 
-                                  (a-loan-state time type 0 is-withdrawn)]
-                                  [modified-customer-2
-                                  (a-customer id type initial-amount (+ amount extra)
-                                  deadline-month credit-counter credit
-                                  interest-rate loans minimum-amount blocked-money)]
-                                  )
-                                  (begin
-                                    (save-loan modified-loan loans)
-                                    (save-customer modified-customer customers)
-                                  )
-                                  (begin
-                                    (save-loan modified-loan-2 loans)
-                                    (save-customer modified-customer-2 customers)
-                                  )
+                          (a-loan-state (time type debt is-withdrawn)
+                            (if (>= debt amount)
+                              (let* ([modified-loan
+                                (a-loan-state time type (- debt amount) is-withdrawn)]
+                                [extra (- amount debt)]
+                                [modified-loan-2 
+                                (a-loan-state time type 0 is-withdrawn)]
+                                [modified-customer-2
+                                (a-customer id type initial-amount (+ amount extra)
+                                deadline-month credit-counter credit
+                                interest-rate loans minimum-amount blocked-money)]
+                                )
+                                (begin
+                                  (save-loan modified-loan loans)
+                                  (save-customer modified-customer customers)
+                                )
+                                (begin
+                                  (save-loan modified-loan-2 loans)
+                                  (save-customer modified-customer-2 customers)
                                 )
                               )
                             )
+                          )
                         )
                       )
                     )
