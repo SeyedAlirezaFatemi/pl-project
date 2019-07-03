@@ -141,6 +141,36 @@
   )
 )
 
+(define modify-loan
+  (lambda (loan loan-list)
+    (if (null? loan-list)
+      (raise 'loan-not-found-for-save)
+      (cases LoanState loan
+        (a-loan-state (time type debt is-withdrawn)
+          (let ([head (car loan-list)])
+            (cases LoanState head
+              (a-loan-state (head-time head-type head-debt head-is-withdrawn)
+                (if (= head-time time)
+                  (cons loan (cdr loan-list))
+                  (cons head (modify-loan loan (cdr loan-list)))
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+(define save-loan
+  (lambda (loan)
+    (begin
+      (set! loans (modify-loan loan loans))
+    )
+  )
+)
+
 (define punish
   (lambda (customer account)
     (cases Customer customer
@@ -262,7 +292,7 @@
   (lambda (month-number customers)
     (if (null? customers)
       #t ; Done
-      (let ([current-account (car customers)])
+      (let ([current-customer (car customers)])
         (cases Customer current-customer
           (a-customer (id type initial-amount current-amount
                        deadline-month credit-counter credit
@@ -270,10 +300,25 @@
             (let* ([interest (calculate-interest interest-rate minimum-amount (account->monthly (get-account-type type)))]
                    [monthly (account->monthly (get-account-type type))])
               (if monthly
-                ; Give interest
-                (if (= 0 (modulo (- month-number ))))
+                (save-customer (a-customer (id type initial-amount (+ interest current-amount)
+                                            deadline-month credit-counter credit
+                                            interest-rate loans (+ interest current-amount) blocked-money creation-time)))
+                (if (= 0 (modulo (- month-number creation-time) 12))
+                  (begin
+                    (save-customer (a-customer (id type initial-amount (+ interest current-amount)
+                                                deadline-month credit-counter credit
+                                                interest-rate loans (+ interest current-amount) blocked-money creation-time)))
+                    (pretty-display "^^^^^^^^^^")
+                    (pretty-display "Interest time:")
+                    (pretty-display current-customer)
+                    (pretty-display interest)
+                    (pretty-display "^^^^^^^^^^")
+                  )
+                  #t ; Done  
+                )
               )
             )
+          )
         )
       )
     )
@@ -287,7 +332,7 @@
         (time-command ()
           (begin
             ; Update minimum amount of customers based on monthly or yearly
-            ()
+            (pay-interests month-number customers)
             (do-tasks tasks)
             (set! month-number (+ month-number 1))
           )
@@ -353,7 +398,7 @@
             (cases Customer customer
               (a-customer (id type initial-amount amount
                           deadline-month credit-counter credit
-                          interest-rate loans minimum-amount blocked-money)
+                          interest-rate loans minimum-amount blocked-money creation-time)
                 (if (>= deadline-month month-number)
                   (raise 'wait-for-the-deadline)
                   (let ([account (get-customers-account customer)])
@@ -391,7 +436,7 @@
             (cases Customer customer
               (a-customer (id type initial-amount amount
                           deadline-month credit-counter credit
-                          interest-rate loans minimum-amount blocked-money)
+                          interest-rate loans minimum-amount blocked-money creation-time)
                 (let ([account (get-customers-account customer)])
                   (cases Account account
                     (an-account  (id has-interest fee minimum-deposit monthly
@@ -433,7 +478,7 @@
             (cases Customer customer
               (a-customer (id type initial-amount amount
                           deadline-month credit-counter credit
-                          interest-rate loans minimum-amount blocked-money)
+                          interest-rate loans minimum-amount blocked-money creation-time)
                 (let ([account (get-customers-account customer)])
                   (cases Account account
                     (an-account  (id has-interest fee minimum-deposit monthly
@@ -446,7 +491,7 @@
                                         (- amount card-amount)
                                         deadline-month
                                         credit-counter credit
-                                        interest-rate loans minimum-amount blocked-money
+                                        interest-rate loans minimum-amount blocked-money creation-time
                             )])
                               (begin
                                 (save-customer modified-customer)
@@ -475,7 +520,7 @@
             (cases Customer customer
               (a-customer (id type initial-amount amount
                           deadline-month credit-counter credit
-                          interest-rate loans minimum-amount blocked-money)
+                          interest-rate loans minimum-amount blocked-money creation-time)
                 (let ([account (get-customers-account customer)])
                   (cases Account account
                     (an-account  (id has-interest fee minimum-deposit monthly
@@ -488,7 +533,7 @@
                                         (- amount transfer-amount)
                                         deadline-month
                                         credit-counter credit
-                                        interest-rate loans minimum-amount blocked-money
+                                        interest-rate loans minimum-amount blocked-money creation-time
                             )])
                             (begin
                               (save-customer modified-customer)
@@ -517,7 +562,7 @@
             (cases Customer customer
               (a-customer (id type initial-amount amount
                           deadline-month credit-counter credit
-                          interest-rate loans minimum-amount blocked-money)
+                          interest-rate loans minimum-amount blocked-money creation-time)
                 (let ([account (get-customers-account customer)])
                   (cases Account account
                     (an-account  (id has-interest fee minimum-deposit monthly
@@ -530,14 +575,14 @@
                                         (- amount withdraw-amount)
                                         deadline-month
                                         credit-counter credit
-                                        interest-rate loans minimum-amount blocked-money
+                                        interest-rate loans minimum-amount blocked-money creation-time
                             )])
                             (begin
-                              (save-customer modified-customer)                   ; LOG
-                              (pretty-display withdraw-amount)                               ; LOG
-                              (pretty-display "$ is paid by withdraw command by customer #")         ; LOG
-                              (pretty-display customer-id)                               ; LOG
-                              (newline)                                           ; LOG
+                              (save-customer modified-customer)
+                              (pretty-display withdraw-amount)
+                              (pretty-display "$ is paid by withdraw command by customer #")
+                              (pretty-display customer-id)
+                              (newline)
                             )
                           )
                           (raise 'not-enough-money-for-withdraw)
@@ -596,7 +641,7 @@
                         (- account-amount amount)
                         deadline-month
                         credit-counter credit
-                        interest-rate loans minimum-amount blocked-money
+                        interest-rate loans minimum-amount blocked-money creation-time
                       )])
                       (let ([latest-loan (latest-loan loans)])
                         (cases LoanState latest-loan
@@ -610,7 +655,7 @@
                                 [modified-customer-2
                                 (a-customer id type initial-amount (+ amount extra)
                                 deadline-month credit-counter credit
-                                interest-rate loans minimum-amount blocked-money)]
+                                interest-rate loans minimum-amount blocked-money creation-time)]
                                 )
                                 (begin
                                   (save-loan modified-loan loans)
@@ -621,6 +666,8 @@
                                   (save-customer modified-customer-2 customers)
                                 )
                               )
+                              ; TODO @estri
+                              3
                             )
                           )
                         )
