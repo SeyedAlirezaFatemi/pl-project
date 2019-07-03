@@ -784,11 +784,11 @@
                                 interest-rate loans minimum-amount blocked-money creation-time)]
                                 )
                                 (begin
-                                  (save-customer modified-customer customers)
+                                  (save-customer modified-customer)
                                   (save-loan modified-loan modified-customer customers)
                                 )
                                 (begin
-                                  (save-customer modified-customer-2 customers)
+                                  (save-customer modified-customer-2)
                                   (save-loan modified-loan-2 modified-customer-2 customers)
                                 )
                               )
