@@ -98,12 +98,12 @@
       (cases Customer customer
         (a-customer (id type initial-amount amount
                       deadline-month credit-counter credit
-                      interest-rate loans minimum-amount blocked-money)
+                      interest-rate loans minimum-amount blocked-money creation-time)
           (let ([head (car customer-list)])
             (cases Customer head
               (a-customer (head-id head-type head-initial-amount head-amount
                             head-deadline-month head-credit-counter head-credit
-                            head-interest-rate head-loans head-minimum-amount head-blocked-money)
+                            head-interest-rate head-loans head-minimum-amount head-blocked-money creation-time)
                 (if (= head-id id)
                   (cons customer (cdr customer-list))
                   (cons head (modify-customer customer (cdr customer-list)))
@@ -141,42 +141,12 @@
   )
 )
 
-(define modify-loan
-  (lambda (loan loan-list)
-    (if (null? loan-list)
-      (raise 'loan-not-found-for-save)
-      (cases LoanState loan
-        (a-loan-state (time type debt is-withdrawn)
-          (let ([head (car loan-list)])
-            (cases LoanState head
-              (a-loan-state (head-time head-type head-debt head-is-withdrawn)
-                (if (= head-time time)
-                  (cons loan (cdr loan-list))
-                  (cons head (modify-loan loan (cdr loan-list)))
-                )
-              )
-            )
-          )
-        )
-      )
-    )
-  )
-)
-
-(define save-loan
-  (lambda (loan)
-    (begin
-      (set! loans (modify-loan loan loans))
-    )
-  )
-)
-
 (define punish
   (lambda (customer account)
     (cases Customer customer
       (a-customer (customer-id type initial-amount amount
                   deadline-month credit-counter credit
-                  interest-rate loans minimum-amount blocked-money)
+                  interest-rate loans minimum-amount blocked-money creation-time)
         (let ([account (get-customers-account customer)])
           (cases Account account
             (an-account  (id has-interest fee minimum-deposit monthly
@@ -188,13 +158,13 @@
                       deadline-month
                       0
                       (- credit (/ account-credit 2))
-                      interest-rate loans minimum-amount blocked-money
+                      interest-rate loans minimum-amount blocked-money month-number
                   )])
                 (begin
-                  (save-customer modified-customer)                   ; LOG
-                  (pretty-display "Punishing customer #")                    ; LOG
-                  (pretty-display customer-id)                               ; LOG
-                  (newline)                                           ; LOG
+                  (save-customer modified-customer)
+                  (pretty-display "Punishing customer #")
+                  (pretty-display customer-id)
+                  (newline)
                 )
               )
             )
@@ -231,7 +201,7 @@
             (cases Customer customer
               (a-customer (id type initial-amount current-amount 
                            deadline-month credit-counter credit 
-                           interest-rate loans minimum-amount blocked-money)
+                           interest-rate loans minimum-amount blocked-money creation-time)
                 (save-customer (an-account id type initial-amount (+ (loan->amount loan) current-amount) 
                                            deadline-month credit-counter (- credit (loan->minimum-credit loan))
                                            interest-rate (append loans (list (a-loan-state month-number (loan->id loan) (loan->amount loan) #f))) 
@@ -277,12 +247,47 @@
   )
 )
 
+(define calculate-interest
+  (lambda (interest-rate amount monthly)
+    (let ([interest (* amount interest-rate)])
+      (if monthly
+        (exact-floor (/ interest 1200))
+        (exact-floor (/ interest 100))
+      )
+    )
+  )
+)
+
+(define pay-interests
+  (lambda (month-number customers)
+    (if (null? customers)
+      #t ; Done
+      (let ([current-account (car customers)])
+        (cases Customer current-customer
+          (a-customer (id type initial-amount current-amount
+                       deadline-month credit-counter credit
+                       interest-rate loans minimum-amount blocked-money creation-time)
+            (let* ([interest (calculate-interest interest-rate minimum-amount (account->monthly (get-account-type type)))]
+                   [monthly (account->monthly (get-account-type type))])
+              (if monthly
+                ; Give interest
+                (if (= 0 (modulo (- month-number ))))
+              )
+            )
+        )
+      )
+    )
+  )
+)
+
 (define do-command
   (lambda (command)
     (with-handlers ([symbol? (lambda (exn) (begin (pretty-display "Exception: ") (pretty-display exn) (newline)))])     ; LOG
       (cases Command command
         (time-command ()
           (begin
+            ; Update minimum amount of customers based on monthly or yearly
+            ()
             (do-tasks tasks)
             (set! month-number (+ month-number 1))
           )
@@ -296,17 +301,18 @@
                            has-variable-interest span-for-increase
                            increase-rate has-cheque has-card transfer-fee)
                 (let ([new-customer
-                      (a-customer customer-id account-type
-                      (- initial-balance fee)         ; => initial-amount
-                      (- initial-balance fee)         ; => amount
-                      (+ month-number period)         ; => deadline-month
-                      0                               ; => credit-counter
-                      0                               ; => credit
-                      interest-rate
-                      '()                             ; => loans
-                      minimum-deposit
-                      0                               ; => blocked-money
-                      )])
+                        (a-customer customer-id account-type
+                                    (- initial-balance fee)         ; => initial-amount
+                                    (- initial-balance fee)         ; => amount
+                                    (+ month-number period)         ; => deadline-month
+                                    0                               ; => credit-counter
+                                    0                               ; => credit
+                                    interest-rate
+                                    '()                             ; => loans
+                                    (- initial-balance fee)         ; => minimum-amount
+                                    0                               ; => blocked-money
+                                    month-number
+                        )])
                   (begin
                     (set! customers (cons new-customer customers))
                     ; log
@@ -323,19 +329,19 @@
             (cases Customer customer
               (a-customer (id type initial-amount amount
                             deadline-month credit-counter credit
-                            interest-rate loans minimum-amount blocked-money)
+                            interest-rate loans minimum-amount blocked-money creation-time)
                 (let ([modified-customer
                     (a-customer id type initial-amount
                         (+ amount add-amount)
                         deadline-month credit-counter credit
-                        interest-rate loans minimum-amount blocked-money
+                        interest-rate loans minimum-amount blocked-money creation-time
                     )])
                   (begin
                     (save-customer modified-customer)
-                    (pretty-display add-amount)                                ; LOG
-                    (pretty-display "$ added to the account of customer #")    ; LOG
-                    (pretty-display customer-id)                               ; LOG
-                    (newline)                                           ; LOG
+                    (pretty-display add-amount)
+                    (pretty-display "$ added to the account of customer #")
+                    (pretty-display customer-id)
+                    (newline)
                   )
                 )
               )
@@ -364,10 +370,10 @@
                                         interest-rate loans minimum-amount blocked-money
                             )])
                             (begin
-                              (save-customer modified-customer)                              ; LOG
-                              (pretty-display "We have the renewal of customer #")       ; LOG
-                              (pretty-display customer-id)                               ; LOG
-                              (newline)                                           ; LOG
+                              (save-customer modified-customer)
+                              (pretty-display "We have the renewal of customer #")
+                              (pretty-display customer-id)
+                              (newline)
                             )
                           )
                           (raise 'not-renewable)
@@ -401,11 +407,11 @@
                                         interest-rate loans minimum-amount blocked-money
                             )])
                             (begin
-                              (save-customer modified-customer)                   ; LOG
-                              (pretty-display cheque-amount)                             ; LOG
-                              (pretty-display "$ is paid by cheque by customer #")       ; LOG
-                              (pretty-display customer-id)                               ; LOG
-                              (newline)                                           ; LOG
+                              (save-customer modified-customer)
+                              (pretty-display cheque-amount)
+                              (pretty-display "$ is paid by cheque by customer #")
+                              (pretty-display customer-id)
+                              (newline)
                             )
                           )
                           (raise 'not-enough-money-for-cheque)
@@ -443,11 +449,11 @@
                                         interest-rate loans minimum-amount blocked-money
                             )])
                               (begin
-                                (save-customer modified-customer)                   ; LOG
-                                (pretty-display card-amount)                               ; LOG
-                                (pretty-display "$ is paid by card by customer #")         ; LOG
-                                (pretty-display customer-id)                               ; LOG
-                                (newline)                                           ; LOG
+                                (save-customer modified-customer)
+                                (pretty-display card-amount)
+                                (pretty-display "$ is paid by card by customer #")
+                                (pretty-display customer-id)
+                                (newline)
                               )
                           )
                           (raise 'not-enough-money-for-card)
@@ -485,11 +491,11 @@
                                         interest-rate loans minimum-amount blocked-money
                             )])
                             (begin
-                              (save-customer modified-customer)                                ; LOG
-                              (pretty-display transfer-amount)                                        ; LOG
-                              (pretty-display "$ is paid by transfer command by customer #")          ; LOG
-                              (pretty-display customer-id)                                            ; LOG
-                              (newline)                                                        ; LOG
+                              (save-customer modified-customer)
+                              (pretty-display transfer-amount)
+                              (pretty-display "$ is paid by transfer command by customer #")
+                              (pretty-display customer-id)
+                              (newline)
                             )
                           )
                           (raise 'not-enough-money-for-transfer)
@@ -584,7 +590,7 @@
                 (cases Customer customer
                   (a-customer (id type initial-amount amount
                               deadline-month credit-counter credit
-                              interest-rate loans minimum-amount blocked-money)
+                              interest-rate loans minimum-amount blocked-money creation-time)
                     (let ([modified-customer
                       (a-customer id type initial-amount
                         (- account-amount amount)
@@ -599,7 +605,7 @@
                               (let* ([modified-loan
                                 (a-loan-state time type (- debt amount) is-withdrawn)]
                                 [extra (- amount debt)]
-                                [modified-loan-2 
+                                [modified-loan-2
                                 (a-loan-state time type 0 is-withdrawn)]
                                 [modified-customer-2
                                 (a-customer id type initial-amount (+ amount extra)
@@ -624,7 +630,7 @@
                 )
               )
             )
-          ) 
+          )
         )
         (withdraw-loan-command (customer-id)
           (let ([customer (get-customer customer-id customers)])
@@ -642,10 +648,10 @@
                       (cases Customer customer
                         (a-customer (id type initial-amount amount
                                     deadline-month credit-counter credit
-                                    interest-rate loans minimum-amount blocked-money)
+                                    interest-rate loans minimum-amount blocked-money creation-time)
                           (save-customer (an-account id type initial-amount (- amount (loan->amount))
                                                      deadline-month credit-counter credit
-                                                     interest-rate (flip-first-not-withdrawn-loan loans) minimum-amount blocked-money))
+                                                     interest-rate (flip-first-not-withdrawn-loan loans) minimum-amount blocked-money creation-time))
                         )
                       )
                     )
@@ -682,8 +688,8 @@
 (define work-on-commands
   (lambda (ls as cs)
     (begin
-      (pretty-display "@@@@@@@@@@")                      ; LOG
-      (pretty-display "Processing commands...")                      ; LOG
+      (pretty-display "@@@@@@@@@@")
+      (pretty-display "Processing commands...")
       (set! account-types as)
       (set! loan-types ls)
       (set! commands cs)

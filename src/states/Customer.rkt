@@ -19,6 +19,7 @@
     (loans loan-states-list?)
     (minimum-amount integer?)
     (blocked-money integer?)
+    (creation-time integer?)
   )
 )
 
@@ -27,7 +28,7 @@
     (cases Customer customer
       (a-customer (id type initial-amount amount 
                    deadline-month credit-counter credit 
-                   interest-rate loans minimum-amount blocked-money)
+                   interest-rate loans minimum-amount blocked-money creation-time)
         id
       )
     )
@@ -39,7 +40,7 @@
     (cases Customer customer
       (a-customer (id type initial-amount amount 
                    deadline-month credit-counter credit 
-                   interest-rate loans minimum-amount blocked-money)
+                   interest-rate loans minimum-amount blocked-money creation-time)
         type
       )
     )
@@ -51,7 +52,7 @@
     (cases Customer customer
       (a-customer (id type initial-amount amount 
                    deadline-month credit-counter credit 
-                   interest-rate loans minimum-amount blocked-money)
+                   interest-rate loans minimum-amount blocked-money creation-time)
         initial-amount
       )
     )
@@ -63,7 +64,7 @@
     (cases Customer customer
       (a-customer (id type initial-amount amount 
                    deadline-month credit-counter credit 
-                   interest-rate loans minimum-amount blocked-money)
+                   interest-rate loans minimum-amount blocked-money creation-time)
         amount
       )
     )
@@ -75,7 +76,7 @@
     (cases Customer customer
       (a-customer (id type initial-amount amount 
                    deadline-month credit-counter credit 
-                   interest-rate loans minimum-amount blocked-money)
+                   interest-rate loans minimum-amount blocked-money creation-time)
         deadline-month
       )
     )
@@ -87,7 +88,7 @@
     (cases Customer customer
       (a-customer (id type initial-amount amount 
                    deadline-month credit-counter credit 
-                   interest-rate loans minimum-amount blocked-money)
+                   interest-rate loans minimum-amount blocked-money creation-time)
         credit-counter
       )
     )
@@ -99,7 +100,7 @@
     (cases Customer customer
       (a-customer (id type initial-amount amount 
                    deadline-month credit-counter credit 
-                   interest-rate loans minimum-amount blocked-money)
+                   interest-rate loans minimum-amount blocked-money creation-time)
         credit
       )
     )
@@ -111,7 +112,7 @@
     (cases Customer customer
       (a-customer (id type initial-amount amount 
                    deadline-month credit-counter credit 
-                   interest-rate loans minimum-amount blocked-money)
+                   interest-rate loans minimum-amount blocked-money creation-time)
         interest-rate
       )
     )
@@ -123,7 +124,7 @@
     (cases Customer customer
       (a-customer (id type initial-amount amount 
                    deadline-month credit-counter credit 
-                   interest-rate loans minimum-amount blocked-money)
+                   interest-rate loans minimum-amount blocked-money creation-time)
         loans
       )
     )
@@ -135,7 +136,7 @@
     (cases Customer customer
       (a-customer (id type initial-amount amount 
                    deadline-month credit-counter credit 
-                   interest-rate loans minimum-amount blocked-money)
+                   interest-rate loans minimum-amount blocked-money creation-time)
         minimum-amount
       )
     )
@@ -147,7 +148,7 @@
     (cases Customer customer
       (a-customer (id type initial-amount amount 
                    deadline-month credit-counter credit 
-                   interest-rate loans minimum-amount blocked-money)
+                   interest-rate loans minimum-amount blocked-money creation-time)
         blocked-money
       )
     )
