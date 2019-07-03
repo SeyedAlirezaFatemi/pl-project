@@ -449,27 +449,30 @@
                            renewable interest-rate credit
                            has-variable-interest span-for-increase
                            increase-rate has-cheque has-card transfer-fee)
-                (let ([new-customer
-                        (a-customer customer-id account-type
-                                    (- initial-balance fee)         ; => initial-amount
-                                    (- initial-balance fee)         ; => amount
-                                    (+ month-number period)         ; => deadline-month
-                                    0                               ; => credit-counter
-                                    0                               ; => credit
-                                    interest-rate
-                                    '()                             ; => loans
-                                    (- initial-balance fee)         ; => minimum-amount
-                                    0                               ; => blocked-money
-                                    month-number
-                        )])
-                  (begin
-                    (set! customers (cons new-customer customers))
-                    ; log
-                    (pretty-display "New customer:")
-                    (display "=>")
-                    (pretty-display interest-rate)
-                    (pretty-display new-customer)
+                (if (>=  (- initial-balance fee) minimum-deposit)
+                  (let ([new-customer
+                          (a-customer customer-id account-type
+                                      (- initial-balance fee)         ; => initial-amount
+                                      (- initial-balance fee)         ; => amount
+                                      (+ month-number period)         ; => deadline-month
+                                      0                               ; => credit-counter
+                                      0                               ; => credit
+                                      interest-rate
+                                      '()                             ; => loans
+                                      (- initial-balance fee)         ; => minimum-amount
+                                      0                               ; => blocked-money
+                                      month-number
+                          )])
+                    (begin
+                      (set! customers (cons new-customer customers))
+                      ; log
+                      (pretty-display "New customer:")
+                      (display "=>")
+                      (pretty-display interest-rate)
+                      (pretty-display new-customer)
+                    )
                   )
+                  #t
                 )
               )
             )
