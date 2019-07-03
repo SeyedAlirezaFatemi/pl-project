@@ -245,7 +245,7 @@
                      [has-card (cadr (cddddr (cddddr (cddddr current))))]
                      [transfer-fee (string->number (cadr match))]
                      )
-                (let ([new-account (an-account id has-interest fee minimum-deposit monthly period renewable increase-rate credit has-variable-interest span-for-increase increase-rate has-cheque has-card transfer-fee)])
+                (let ([new-account (an-account id has-interest fee minimum-deposit monthly period renewable interest-rate credit has-variable-interest span-for-increase increase-rate has-cheque has-card transfer-fee)])
                   (analyse-setups rest-setups 0 loan-types (cons new-account account-types) '())
                 ) 
               )

@@ -217,7 +217,19 @@
 (define create-loan
   (lambda (customer loan)
     (let ([amount (loan->amount loan)])
-      (add-task (give-loan-task customer loan))
+      (begin 
+        (cases Customer customer
+          (a-customer (id type initial-amount current-amount 
+                          deadline-month credit-counter credit 
+                          interest-rate loans minimum-amount blocked-money creation-time)
+            (save-customer (a-customer id type initial-amount (- current-amount (loan->blocked-amount loan)) 
+                                        deadline-month credit-counter credit
+                                        interest-rate loans 
+                                        minimum-amount (+ blocked-money (loan->blocked-amount loan)) creation-time))
+          )
+        )
+        (add-task (give-loan-task customer loan))
+      )
     )
   )
 )
@@ -241,10 +253,10 @@
               (a-customer (id type initial-amount current-amount 
                            deadline-month credit-counter credit 
                            interest-rate loans minimum-amount blocked-money creation-time)
-                (save-customer (an-account id type initial-amount (+ (loan->amount loan) current-amount) 
+                (save-customer (a-customer id type initial-amount (+ (loan->amount loan) current-amount) 
                                            deadline-month credit-counter (- credit (loan->minimum-credit loan))
                                            interest-rate (append loans (list (a-loan-state month-number (loan->id loan) (loan->amount loan) #f))) 
-                                           minimum-amount (+ blocked-money (loan->blocked-amount loan))))
+                                           minimum-amount blocked-money creation-time))
               )
             )
           )
@@ -730,8 +742,7 @@
                 (create-loan customer loan)
               )
               (begin
-                (pretty-display "Request for loan denied.")
-                (pretty-display "We are fucked.")
+                (pretty-display "Request for loan denied. Not enough credit or money.")
                 (pretty-display loan)
                 (pretty-display command)
               )
