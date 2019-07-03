@@ -22,7 +22,7 @@
     (if (null? customers) 
       out
       (cases Customer (car customers)
-          (a-customer (id type initial-amount amount deadline-month credit-counter credit interest-rate loans minimum-amount blocked-money)
+          (a-customer (id type initial-amount amount deadline-month credit-counter credit interest-rate loans minimum-amount blocked-money creation-time)
             (write id out)
             (write initial-amount out)
             (write amount out)

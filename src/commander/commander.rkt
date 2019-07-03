@@ -97,9 +97,9 @@
       (a-customer (id type initial-amount amount
                   deadline-month credit-counter credit
                   interest-rate loans minimum-amount blocked-money creation-time)
-        (let [new-customer (a-customer (id type initial-amount amount
+        (let ([new-customer (a-customer (id type initial-amount amount
                                         deadline-month credit-counter credit
-                                        interest-rate (modify-loan loan loans) minimum-amount blocked-money creation-time))]
+                                        interest-rate (modify-loan loan loans) minimum-amount blocked-money creation-time))])
           (save-customer new-customer)
         ) 
       )
@@ -305,17 +305,17 @@
           (a-customer (id type initial-amount current-amount
                        deadline-month credit-counter credit
                        interest-rate loans minimum-amount blocked-money creation-time)
-            (let* ([interest (calculate-interest interest-rate minimum-amount (account->monthly (get-account-type type)))]
-                   [monthly (account->monthly (get-account-type type))])
+            (let* ([interest (calculate-interest interest-rate minimum-amount (account->monthly (get-account-type type account-types)))]
+                   [monthly (account->monthly (get-account-type type account-types))])
               (if monthly
-                (save-customer (a-customer (id type initial-amount (+ interest current-amount)
+                (save-customer (a-customer id type initial-amount (+ interest current-amount)
                                             deadline-month credit-counter credit
-                                            interest-rate loans (+ interest current-amount) blocked-money creation-time)))
+                                            interest-rate loans (+ interest current-amount) blocked-money creation-time))
                 (if (= 0 (modulo (- month-number creation-time) 12))
                   (begin
-                    (save-customer (a-customer (id type initial-amount (+ interest current-amount)
+                    (save-customer (a-customer id type initial-amount (+ interest current-amount)
                                                 deadline-month credit-counter credit
-                                                interest-rate loans (+ interest current-amount) blocked-money creation-time)))
+                                                interest-rate loans (+ interest current-amount) blocked-money creation-time))
                     ; Log
                     (pretty-display "^^^^^^^^^^")
                     (pretty-display "Interest time:")
@@ -632,7 +632,7 @@
         )
         (request-loan-command (customer-id loan-type) 
           (let* ([customer (get-customer customer-id customers)]
-                 [loan (get-loan-type loan-type)])
+                 [loan (get-loan-type loan-type loan-types)])
             (if (and 
                   (>= (customer->amount customer) (loan->blocked-amount loan))
                   (>= (customer->credit customer) (loan->minimum-credit loan))
