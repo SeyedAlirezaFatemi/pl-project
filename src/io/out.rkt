@@ -19,7 +19,7 @@
 )
 
 (define write-customers
-  (lambda (account-types customers out)
+  (lambda (account-types loan-types customers out)
     (if (null? customers) 
       out
       (cases Customer (car customers)
@@ -40,7 +40,7 @@
               (write interest-rate out)
             )
             (write "\t" out)
-            (write (time->amount (latest-loan-time loans) loans time->amount) out)
+            (write (time->amount (latest-loan-time loans) loans loan-types) out)
             (write "\t" out)            
             (write (latest-loan-time loans) out)
             (write "\t" out)            
@@ -89,7 +89,7 @@
     (if (null? loans)
       0
       (if (equal? spec-time (loan-state->time (car loans)))
-        (loan->amount (get-loan-type (loan-state->type (car loans))) loan-types)
+        (loan->amount (get-loan-type (loan-state->type (car loans)) loan-types) )
         (time->amount spec-time (cdr loans))
       )
     )
