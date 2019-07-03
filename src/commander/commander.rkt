@@ -57,12 +57,10 @@
     (if (null? loan-type-list)
       (raise 'loan-not-found)
       (let ([loan (car loan-type-list)])
-        (cases Loan loan
-          (a-loan  (id amount blocked-amount return-span interest last-loan-span minimum-credit)
-            (if (= id search-id)
-              loan
-              (get-loan-type search-id (cdr loan-type-list))
-            )
+        (let ([loan-id (loan->id loan)])
+          (if (= loan-id search-id)
+            loan
+            (get-loan-type search-id (cdr loan-type-list))
           )
         )
       )
