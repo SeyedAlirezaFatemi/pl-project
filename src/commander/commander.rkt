@@ -37,14 +37,10 @@
     (if (null? account-type-list)
       (begin (raise 'account-not-found))
       (let ([acc (car account-type-list)])
-        (cases Account acc
-          (an-account  (id has-interest fee minimum-deposit monthly 
-                        period renewable interest-rate credit has-variable-interest 
-                        span-for-increase increase-rate has-cheque has-card transfer-fee)
-            (if (= id search-id)
-              acc
-              (get-account-type search-id (cdr account-type-list))
-            )
+        (let ([acc-id (account->id acc)])
+          (if (= acc-id search-id)
+            acc
+            (get-account-type search-id (cdr account-type-list))
           )
         )
       )
