@@ -374,11 +374,11 @@
                                                 interest-rate loans minimum-amount blocked-money
                                             )])
                                           (begin
-                                            (save-customer modified-customer)                   ; LOG
-                                            (display transfer-amount)                               ; LOG
-                                            (display "$ is paid by transfer command by customer #")         ; LOG
-                                            (display customer-id)                               ; LOG
-                                            (newline)                                           ; LOG
+                                            (save-customer modified-customer)                                ; LOG
+                                            (display transfer-amount)                                        ; LOG
+                                            (display "$ is paid by transfer command by customer #")          ; LOG
+                                            (display customer-id)                                            ; LOG
+                                            (newline)                                                        ; LOG
                                           )
                                         )
                                         (raise 'not-enough-money-for-transfer)
@@ -443,7 +443,14 @@
         (request-loan-command (customer-id loan-type) 
           (let* ([customer (get-customer customer-id customers)]
                  [loan (get-loan-type loan-type)])
-            10
+            (if (and 
+                  (>= (customer->amount customer) (loan->blocked-amount loan))
+                  (>= (customer->credit customer) (loan->minimum-credit loan))
+                  ; Check last loan time
+                )
+              #t
+              (display "Request for loan denied.")
+            )
           )
         )
         (pay-debt-command (customer-id amount) 11
