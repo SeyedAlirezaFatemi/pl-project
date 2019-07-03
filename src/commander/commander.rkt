@@ -388,7 +388,7 @@
             (a-customer (id type initial-amount current-amount
                         deadline-month credit-counter credit
                         interest-rate loans minimum-amount blocked-money creation-time)
-              (if (and (= 0 (modulo (- month-number creation-time) span-for-increase)) (account->has-variable-interest (get-account-type type account-types)))
+              (if (and (= 0 (modulo (- month-number creation-time) (account->span-for-increase (get-account-type type account-types)))) (account->has-variable-interest (get-account-type type account-types)))
                 (if (= 0 (- month-number creation-time))
                   #t ; Done
                   (begin
