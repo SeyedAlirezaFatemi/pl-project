@@ -19,9 +19,9 @@
       (pretty-display commands)
       (let ([customers (work-on-commands loan-types account-types commands)])
         (
-            begin
-            (pretty-display customers)
-            (finish 4 account-types customers)
+          begin
+          (pretty-display customers)
+          (finish 4 account-types customers)
         )
       )
     )

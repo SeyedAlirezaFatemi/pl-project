@@ -13,6 +13,7 @@
 (define commands '())
 (define customers '())
 (define to-do '())
+(define month-number 0)
 
 ;(define exn-test
 ;  (lambda ()
@@ -188,8 +189,6 @@
     )
   )
 )
-
-(define month-number 0)
 
 (define do-command
   (lambda (command)
