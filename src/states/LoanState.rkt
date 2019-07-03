@@ -4,7 +4,7 @@
 
 (define-datatype LoanState LoanState?
   (a-loan-state
-    (time integer?) ; Start
+    (time integer?) ; Start month
     (type integer?)
     (debt integer?)
     (is-withdrawn boolean?)

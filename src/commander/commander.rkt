@@ -18,19 +18,6 @@
 (define tasks '())
 (define month-number 0)
 
-;(define exn-test
-;  (lambda ()
-;    (with-handlers ([exn:fail? (lambda (exn) 'discarded)])
-;        (begin
-;        (pretty-display 1)
-;        (newline)
-;        (error 'chi!)
-;        (pretty-display 2)
-;        (newline))
-;    )
-;   )
-;)
-
 (define get-account-type
   (lambda (search-id account-type-list)
     (if (null? account-type-list)
@@ -198,9 +185,41 @@
                            interest-rate loans minimum-amount blocked-money)
                 (save-customer (an-account id type initial-amount (+ (loan->amount loan) current-amount) 
                                            deadline-month credit-counter (- credit (loan->minimum-credit loan))
-                                           interest-rate (cons (a-loan-state month-number (loan->id loan) (loan->amount loan) #f) loans) 
+                                           interest-rate (append loans (list (a-loan-state month-number (loan->id loan) (loan->amount loan) #f))) 
                                            minimum-amount (+ blocked-money (loan->blocked-amount loan))) customers)
               )
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+(define find-first-not-withdrawn-loan
+  (lambda (loans)
+    (if (null? loans)
+      #f
+      (let ([last-loan (car loans)])
+        (if (loan-state->is-withdrawn last-loan)
+          (find-first-not-withdrawn-loan (cdr loans))
+          last-loan
+        )
+      )
+    )
+  )
+)
+
+(define flip-first-not-withdrawn-loan
+  (lambda (loans)
+    (if (null? loans)
+      loans
+      (let ([last-loan (car loans)])
+        (if (loan-state->is-withdrawn last-loan)
+          (cons last-loan (find-first-not-withdrawn-loan (cdr loans)))
+          (cases LoanState last-loan
+            (a-loan-state (time type debt is-withdrawn)
+              (cons (a-loan-state time type debt #t) (cdr loans))
             )
           )
         )
@@ -543,7 +562,17 @@
                   (pretty-display "Customer has no loan to withdraw.")
                   (pretty-display command)
                 )
-                ; TODO
+                (let ([found (find-first-not-withdrawn-loan loans)])
+                  (if found
+                    (let ([loan-type (get-loan-type (loan-state->type found) loan-types)])
+                      ; Update customer and its loans
+                    )
+                    (begin 
+                      (pretty-display "Nothing to withdraw!")
+                      (pretty-display command)
+                    )
+                  )
+                )
               )
             )
           )
@@ -560,9 +589,9 @@
       (begin
         (do-command (car commands))
         (pretty-display month-number)                   ; LOG
-        (newline)                                ; LOG
+        (newline)                                       ; LOG
         (pretty-display customers)                      ; LOG
-        (newline)                                ; LOG
+        (newline)                                       ; LOG
         (do-commands (cdr commands))
       )
     )
@@ -573,7 +602,7 @@
   (lambda (ls as cs)
     (begin
       (pretty-display 'Started!!)                      ; LOG
-      (newline)                                 ; LOG
+      (newline)                                        ; LOG
       (set! account-types as)
       (set! loan-types ls)
       (set! commands cs)

@@ -9,13 +9,10 @@ Time goes by.
 Time goes by.
 
 
-Customer 3 transfers 100000 Tomans.
 
 Time goes by.
 
 
-Customer 3 adds 360000 Tomans to his account.
-Customer 1 wants to create an account of type 3. Customer 1 wants to start with 1200000 Tomans.
 
 Time goes by.
 
@@ -109,7 +106,6 @@ Time goes by.
 
 Customer 1 requests a loan of type 1.
 
-Customer 1 withdraws the loan.
 
 Time goes by.
 Time goes by.
@@ -134,7 +130,7 @@ Account type 1
 
 current-account? false
 bank-fee? 10000 Tomans
-minimum-deposit? 200000 Tomans
+minimum-deposit? 170000 Tomans
 
 
 monthly? true
