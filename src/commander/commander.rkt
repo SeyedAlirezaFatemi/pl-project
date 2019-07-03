@@ -28,6 +28,8 @@
         (pretty-display "After: ")
       )
       (pretty-display current-command)
+      (pretty-display "Current Month:")
+      (pretty-display month-number)
       (pretty-display "Customers: ")
       (pretty-display current-customers)
       (pretty-display "Tasks: ")
@@ -349,16 +351,19 @@
                         deadline-month credit-counter credit
                         interest-rate loans minimum-amount blocked-money creation-time)
               (if (= 0 (modulo (- month-number creation-time) 12))
-                (begin
-                  (save-customer (a-customer id type initial-amount current-amount
-                                              deadline-month credit-counter (+ credit (account->credit (get-account-type type account-types)))
-                                              interest-rate loans current-amount blocked-money creation-time))
-                  ; Log
-                  (pretty-display "<><><><><>")
-                  (pretty-display "Credit time:")
-                  (pretty-display current-customer)
-                  (pretty-display (+ credit (account->credit (get-account-type type account-types))))
-                  (pretty-display "<><><><><>")
+                (if (= 0 (- month-number creation-time))
+                  #t ; Done
+                  (begin
+                    (save-customer (a-customer id type initial-amount current-amount
+                                                deadline-month credit-counter (+ credit (account->credit (get-account-type type account-types)))
+                                                interest-rate loans current-amount blocked-money creation-time))
+                    ; Log
+                    (pretty-display "<><><><><>")
+                    (pretty-display "Credit time:")
+                    (pretty-display current-customer)
+                    (pretty-display (+ credit (account->credit (get-account-type type account-types))))
+                    (pretty-display "<><><><><>")
+                  )
                 )
                 #t ; Done  
               )
