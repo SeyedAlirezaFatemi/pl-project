@@ -22,9 +22,8 @@
 (define log
   (lambda (before current-command current-customers current-tasks current-month-number)
     (begin
-      (pretty-display "**********")
       (if before
-        (1)
+        '()
         (begin (pretty-display "State: ")
         (pretty-display current-command)
         (pretty-display "Current Month:")
