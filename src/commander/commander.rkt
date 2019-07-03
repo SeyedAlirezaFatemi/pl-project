@@ -2,6 +2,7 @@
 
 (provide (all-defined-out))
 (require eopl)
+(require racket/pretty)
 (require "../io/in.rkt")
 (require "../commander/Command.rkt")
 (require "../states/Customer.rkt")
@@ -21,10 +22,10 @@
 ;  (lambda ()
 ;    (with-handlers ([exn:fail? (lambda (exn) 'discarded)])
 ;        (begin
-;        (display 1)
+;        (pretty-display 1)
 ;        (newline)
 ;        (error 'chi!)
-;        (display 2)
+;        (pretty-display 2)
 ;        (newline))
 ;    )
 ;   )
@@ -155,8 +156,8 @@
                   )])
                 (begin
                   (save-customer modified-customer)                   ; LOG
-                  (display "Punishing customer #")                    ; LOG
-                  (display customer-id)                               ; LOG
+                  (pretty-display "Punishing customer #")                    ; LOG
+                  (pretty-display customer-id)                               ; LOG
                   (newline)                                           ; LOG
                 )
               )
@@ -179,8 +180,8 @@
 (define add-task
   (lambda (new-task)
     (set! tasks (cons new-task tasks))
-    (display "New task added.")
-    (display new-task)
+    (pretty-display "New task added.")
+    (pretty-display new-task)
   )
 )
 
@@ -209,7 +210,7 @@
 
 (define do-command
   (lambda (command)
-    (with-handlers ([symbol? (lambda (exn) (begin (display "Exception: ") (display exn) (newline)))])     ; LOG
+    (with-handlers ([symbol? (lambda (exn) (begin (pretty-display "Exception: ") (pretty-display exn) (newline)))])     ; LOG
       (cases Command command
         (time-command ()
           (begin
@@ -239,7 +240,7 @@
                       )])
                   (begin
                     (set! customers (cons new-customer customers))
-                    (display 'account-created!) ; LOG
+                    (pretty-display 'account-created!) ; LOG
                     (newline)                   ; LOG
                   )
                 )
@@ -261,9 +262,9 @@
                     )])
                   (begin
                     (save-customer modified-customer)
-                    (display add-amount)                                ; LOG
-                    (display "$ added to the account of customer #")    ; LOG
-                    (display customer-id)                               ; LOG
+                    (pretty-display add-amount)                                ; LOG
+                    (pretty-display "$ added to the account of customer #")    ; LOG
+                    (pretty-display customer-id)                               ; LOG
                     (newline)                                           ; LOG
                   )
                 )
@@ -294,8 +295,8 @@
                                             )])
                                           (begin
                                             (save-customer modified-customer)                              ; LOG
-                                            (display "We have the renewal of customer #")       ; LOG
-                                            (display customer-id)                               ; LOG
+                                            (pretty-display "We have the renewal of customer #")       ; LOG
+                                            (pretty-display customer-id)                               ; LOG
                                             (newline)                                           ; LOG
                                           )
                                         )
@@ -331,9 +332,9 @@
                                             )])
                                           (begin
                                             (save-customer modified-customer)                   ; LOG
-                                            (display cheque-amount)                             ; LOG
-                                            (display "$ is paid by cheque by customer #")       ; LOG
-                                            (display customer-id)                               ; LOG
+                                            (pretty-display cheque-amount)                             ; LOG
+                                            (pretty-display "$ is paid by cheque by customer #")       ; LOG
+                                            (pretty-display customer-id)                               ; LOG
                                             (newline)                                           ; LOG
                                           )
                                         )
@@ -373,9 +374,9 @@
                                             )])
                                           (begin
                                             (save-customer modified-customer)                   ; LOG
-                                            (display card-amount)                               ; LOG
-                                            (display "$ is paid by card by customer #")         ; LOG
-                                            (display customer-id)                               ; LOG
+                                            (pretty-display card-amount)                               ; LOG
+                                            (pretty-display "$ is paid by card by customer #")         ; LOG
+                                            (pretty-display customer-id)                               ; LOG
                                             (newline)                                           ; LOG
                                           )
                                         )
@@ -415,9 +416,9 @@
                                             )])
                                           (begin
                                             (save-customer modified-customer)                                ; LOG
-                                            (display transfer-amount)                                        ; LOG
-                                            (display "$ is paid by transfer command by customer #")          ; LOG
-                                            (display customer-id)                                            ; LOG
+                                            (pretty-display transfer-amount)                                        ; LOG
+                                            (pretty-display "$ is paid by transfer command by customer #")          ; LOG
+                                            (pretty-display customer-id)                                            ; LOG
                                             (newline)                                                        ; LOG
                                           )
                                         )
@@ -457,9 +458,9 @@
                                             )])
                                           (begin
                                             (save-customer modified-customer)                   ; LOG
-                                            (display withdraw-amount)                               ; LOG
-                                            (display "$ is paid by withdraw command by customer #")         ; LOG
-                                            (display customer-id)                               ; LOG
+                                            (pretty-display withdraw-amount)                               ; LOG
+                                            (pretty-display "$ is paid by withdraw command by customer #")         ; LOG
+                                            (pretty-display customer-id)                               ; LOG
                                             (newline)                                           ; LOG
                                           )
                                         )
@@ -491,15 +492,15 @@
                 (if (> month-number (+ (latest-loan-time (customer->loans customer)) (loan->last-loan-span loan)))
                   (create-loan customer loan)
                   (begin
-                    (display "Request for loan denied.")
-                    (display command)
+                    (pretty-display "Request for loan denied.")
+                    (pretty-display command)
                   )
                 ) 
                 (create-loan customer loan)
               )
               (begin
-                (display "Request for loan denied.")
-                (display command)
+                (pretty-display "Request for loan denied.")
+                (pretty-display command)
               )
             )
           )
@@ -508,7 +509,7 @@
           (let* ([customer (get-customer customer-id customers)]
                  [account-amount (customer->amount customer)])
             (if (> amount account-amount)
-              (display "You don't have enoygh money in your account.")
+              (pretty-display "You don't have enoygh money in your account.")
               (begin
                 (cases Customer customer
                   (a-customer (id type initial-amount amount
@@ -533,8 +534,18 @@
             )
           )
         )
-
-        (withdraw-loan-command (customer-id) 12
+        (withdraw-loan-command (customer-id)
+          (let ([customer (get-customer customer-id customers)])
+            (let ([loans (customer->loans customer)])
+              (if (null? loans)
+                (begin
+                  (pretty-display "Customer has no loan to withdraw.")
+                  (pretty-display command)
+                )
+                
+              )
+            )
+          )
         )
       )
     )
@@ -547,9 +558,9 @@
       customers
       (begin
         (do-command (car commands))
-        (display month-number)                   ; LOG
+        (pretty-display month-number)                   ; LOG
         (newline)                                ; LOG
-        (display customers)                      ; LOG
+        (pretty-display customers)                      ; LOG
         (newline)                                ; LOG
         (do-commands (cdr commands))
       )
@@ -560,7 +571,7 @@
 (define work-on-commands
   (lambda (ls as cs)
     (begin
-      (display 'Started!!)                      ; LOG
+      (pretty-display 'Started!!)                      ; LOG
       (newline)                                 ; LOG
       (set! account-types as)
       (set! loan-types ls)

@@ -48,11 +48,7 @@
   (lambda (loans debts)
     (if (null? loans)
       debts
-      (cases LoanState (car loans)
-        (a-loan-state (time type debt)
-          (sum-of-debts (cdr loans) (+ debt debts))
-        )
-      )
+      (sum-of-debts (cdr loans) (+ (loan-state->debt (car loans)) debts))
     )
   )
 )
@@ -61,18 +57,16 @@
   (lambda (loans)
     (if (null? loans)
       0
-      (cases LoanState (car loans)
-        (a-loan-state (time type debt)
-          (if (null? (cdr loans))
-            time
-            (let ([rest-time (latest-loan-time (cdr loans))])
-              (if (> time rest-time)
-                time
-                rest-time
-              )
+      (let ([time (loan-state->time (car loans))])
+        (if (null? (cdr loans))
+          time
+          (let ([rest-time (latest-loan-time (cdr loans))])
+            (if (> time rest-time)
+              time
+              rest-time
             )
           )
-        )
+        ) 
       )
     )
   )
@@ -82,13 +76,9 @@
   (lambda (spec-time loans)
     (if (null? loans)
       0
-      (cases LoanState (car loans)
-        (a-loan-state (time type debt)
-          (if (equal? spec-time time)
-            debt
-            (time->debt spec-time (cdr loans))
-          )
-        )
+      (if (equal? spec-time (loan-state->time (car loans)))
+        (loan-state->debt (car loans))
+        (time->debt spec-time (cdr loans))
       )
     )
   )
