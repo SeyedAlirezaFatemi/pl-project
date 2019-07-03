@@ -86,13 +86,7 @@
 
 (define get-customers-account
   (lambda (customer)
-    (cases Customer customer
-      (a-customer (id type initial-amount amount
-                   deadline-month credit-counter credit 
-                   interest-rate loans minimum-amount blocked-money)
-        (get-account-type type account-types)
-      )
-    )
+    (get-account-type (customer->type customer) account-types)
   )
 )
 
