@@ -69,6 +69,44 @@
   )
 )
 
+(define modify-loan
+  (lambda (loan loan-list)
+    (if (null? loan-list)
+      (raise 'loan-not-found-for-save)
+      (cases LoanState loan
+        (a-loan-state (time type debt is-withdrawn)
+          (let ([head (car loan-list)])
+            (cases LoanState head
+              (a-loan-state (head-time head-type head-debt head-is-withdrawn)
+                (if (= head-time time)
+                  (cons loan (cdr loan-list))
+                  (cons head (modify-loan loan (cdr loan-list)))
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+(define save-loan
+  (lambda (loan customer customers)
+    (cases Customer customer
+      (a-customer (id type initial-amount amount
+                  deadline-month credit-counter credit
+                  interest-rate loans minimum-amount blocked-money creation-time)
+        (let [new-customer (a-customer (id type initial-amount amount
+                                        deadline-month credit-counter credit
+                                        interest-rate (modify-loan loan loans) minimum-amount blocked-money creation-time))]
+          (save-customer new-customer)
+        ) 
+      )
+    )
+  )
+)
+
 (define get-customer
   (lambda (search-id customer-list)
     (if (null? customer-list)
@@ -137,28 +175,6 @@
   (lambda (customer)
     (begin
       (set! customers (modify-customer customer customers))
-    )
-  )
-)
-
-(define modify-loan
-  (lambda (loan loan-list)
-    (if (null? loan-list)
-      (raise 'loan-not-found-for-save)
-      (cases LoanState loan
-        (a-loan-state (time type debt is-withdrawn)
-          (let ([head (car loan-list)])
-            (cases LoanState head
-              (a-loan-state (head-time head-type head-debt head-is-withdrawn)
-                (if (= head-time time)
-                  (cons loan (cdr loan-list))
-                  (cons head (modify-loan loan (cdr loan-list)))
-                )
-              )
-            )
-          )
-        )
-      )
     )
   )
 )
@@ -670,12 +686,12 @@
                                 interest-rate loans minimum-amount blocked-money creation-time)]
                                 )
                                 (begin
-                                  (save-loan modified-loan loans)
                                   (save-customer modified-customer customers)
+                                  (save-loan modified-loan modified-customer customers)
                                 )
                                 (begin
-                                  (save-loan modified-loan-2 loans)
                                   (save-customer modified-customer-2 customers)
+                                  (save-loan modified-loan-2 modified-customer-2 customers)
                                 )
                               )
                               ; TODO @estri
