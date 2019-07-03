@@ -7,14 +7,14 @@
 (require "../states/Customer.rkt")
 (require "../blueprints/Account.rkt")
 (require "../blueprints/Loan.rkt")
-(require "../blueprints/ToDo.rkt")
+(require "../blueprints/Task.rkt")
 (require "../utils/helpers.rkt")
 
 (define loan-types '())
 (define account-types '())
 (define commands '())
 (define customers '())
-(define to-dos '())
+(define tasks '())
 (define month-number 0)
 
 ;(define exn-test
@@ -29,10 +29,6 @@
 ;    )
 ;   )
 ;)
-
-; (an-account  (id has-interest fee minimum-deposit monthly
-;                period renewable interest-rate credit has-variable-interest
-;                span-for-increase increase-rate has-cheque has-card transfer-fee ))
 
 (define get-account-type
   (lambda (search-id account-type-list)
@@ -175,26 +171,26 @@
 (define create-loan
   (lambda (customer loan)
     (let ([amount (loan->amount loan)])
-      (add-to-do (give-loan customer loan))
+      (add-task (give-loan-task customer loan))
     )
   )
 )
 
-(define add-to-do
-  (lambda (new-to-do)
-    (set! to-dos (cons new-to-do to-dos))
-    (display "New ToDo added.")
-    (display new-to-do)
+(define add-task
+  (lambda (new-task)
+    (set! tasks (cons new-task tasks))
+    (display "New task added.")
+    (display new-task)
   )
 )
 
 (define do-tasks
-  (lambda (tasks)
-    (if (null? tasks)
-      (set! to-dos '()) ; We're done
-      (let ([current-task (car tasks)])
-        (cases ToDo current-task
-          (give-loan (customer loan) 
+  (lambda (current-tasks)
+    (if (null? current-tasks)
+      (set! tasks '()) ; We're done
+      (let ([current-task (car current-tasks)])
+        (cases Task current-task
+          (give-loan-task (customer loan) 
             (cases Customer customer
               (a-customer (id type initial-amount current-amount 
                            deadline-month credit-counter credit 
@@ -216,7 +212,10 @@
     (with-handlers ([symbol? (lambda (exn) (begin (display "Exception: ") (display exn) (newline)))])     ; LOG
       (cases Command command
         (time-command ()
-          (set! month-number (+ month-number 1))
+          (begin
+            (set! month-number (+ month-number 1))
+            (do-tasks)
+          )
         )
         (new-account-command (customer-id account-type initial-balance)
           (let ([acc (get-account-type account-type account-types) ])

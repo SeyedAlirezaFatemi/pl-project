@@ -4,8 +4,8 @@
 (require "../states/Customer.rkt")
 (require "../blueprints/Loan.rkt")
 
-(define-datatype ToDo ToDo?
-  (give-loan
+(define-datatype Task Task?
+  (give-loan-task
     (customer Customer?)
     (loan Loan?) 
   )
