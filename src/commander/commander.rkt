@@ -7,6 +7,7 @@
 (require "../states/Customer.rkt")
 (require "../blueprints/Account.rkt")
 (require "../blueprints/Loan.rkt")
+(require "../utils/helpers.rkt")
 
 (define loan-types '())
 (define account-types '())
@@ -168,6 +169,10 @@
       )
     )
   )
+)
+
+(define create-loan
+  (lambda )
 )
 
 (define do-command
@@ -446,10 +451,21 @@
             (if (and 
                   (>= (customer->amount customer) (loan->blocked-amount loan))
                   (>= (customer->credit customer) (loan->minimum-credit loan))
-                  ; Check last loan time
                 )
-              #t
-              (display "Request for loan denied.")
+              (if (latest-loan-time (customer->loans customer))
+                (if (> month-number (+ (latest-loan-time (customer->loans customer)) (loan->last-loan-span loan)))
+                  4 ;Ok
+                  (begin
+                    (display "Request for loan denied.")
+                    (display command)
+                  )
+                ) 
+                4 ;Ok
+              )
+              (begin
+                (display "Request for loan denied.")
+                (display command)
+              )
             )
           )
         )
