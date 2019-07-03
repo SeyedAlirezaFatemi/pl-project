@@ -117,10 +117,6 @@ current-account? false
 bank-fee? 10000 Tomans
 minimum-deposit? 170000 Tomans
 
-        id
-        interest-rate
-        credit
-
 
 monthly? true
 
