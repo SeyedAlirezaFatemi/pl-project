@@ -298,7 +298,6 @@
   )
 )
 
-; TODO: check period.
 (define pay-interests
   (lambda (month-number customers)
     (if (null? customers)
@@ -309,25 +308,28 @@
             (a-customer (id type initial-amount current-amount
                         deadline-month credit-counter credit
                         interest-rate loans minimum-amount blocked-money creation-time)
-              (let* ([interest (calculate-interest interest-rate minimum-amount (account->monthly (get-account-type type account-types)))]
-                    [monthly (account->monthly (get-account-type type account-types))])
-                (if monthly
-                  (save-customer (a-customer id type initial-amount (+ interest current-amount)
-                                              deadline-month credit-counter credit
-                                              interest-rate loans (+ interest current-amount) blocked-money creation-time))
-                  (if (= 0 (modulo (- month-number creation-time) 12))
-                    (begin
-                      (save-customer (a-customer id type initial-amount (+ interest current-amount)
-                                                  deadline-month credit-counter credit
-                                                  interest-rate loans (+ interest current-amount) blocked-money creation-time))
-                      ; Log
-                      (pretty-display "^^^^^^^^^^")
-                      (pretty-display "Interest time:")
-                      (pretty-display current-customer)
-                      (pretty-display interest)
-                      (pretty-display "^^^^^^^^^^")
+              (if (> month-number deadline-month)
+                #t ; Done
+                (let* ([interest (calculate-interest interest-rate minimum-amount (account->monthly (get-account-type type account-types)))]
+                      [monthly (account->monthly (get-account-type type account-types))])
+                  (if monthly
+                    (save-customer (a-customer id type initial-amount (+ interest current-amount)
+                                                deadline-month credit-counter credit
+                                                interest-rate loans (+ interest current-amount) blocked-money creation-time))
+                    (if (= 0 (modulo (- month-number creation-time) 12))
+                      (begin
+                        (save-customer (a-customer id type initial-amount (+ interest current-amount)
+                                                    deadline-month credit-counter credit
+                                                    interest-rate loans (+ interest current-amount) blocked-money creation-time))
+                        ; Log
+                        (pretty-display "^^^^^^^^^^")
+                        (pretty-display "Interest time:")
+                        (pretty-display current-customer)
+                        (pretty-display interest)
+                        (pretty-display "^^^^^^^^^^")
+                      )
+                      #t ; Done  
                     )
-                    #t ; Done  
                   )
                 )
               )
