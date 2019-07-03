@@ -404,7 +404,8 @@
                   #t ; Done
                   (begin
                     (save-customer (a-customer id type initial-amount current-amount
-                                               deadline-month credit-counter credit
+                                               deadline-month credit-counter
+                                               (+ credit (account->credit (get-account-type type account-types)))
                                                (+ interest-rate (account->increase-rate (get-account-type type account-types)))
                                                loans current-amount blocked-money creation-time))
                     ; Log
