@@ -495,8 +495,36 @@
             )
           )
         )
-        (pay-debt-command (customer-id amount) 11
+        (pay-debt-command (customer-id amount)
+          (let* ([customer (get-customer customer-id customers)]
+                 [account-amount (customer->amount customer)])
+            (if (> amount account-amount)
+              (display "You don't have enoygh money in your account.")
+              (begin
+                (cases Customer customer
+                  (a-customer (id type initial-amount amount
+                              deadline-month credit-counter credit
+                              interest-rate loans minimum-amount blocked-money)
+                    (let ([modified-customer
+                      (a-customer id type initial-amount
+                        (- account-amount amount)
+                        deadline-month
+                        credit-counter credit
+                        interest-rate loans minimum-amount blocked-money
+                      )])
+                      (let* ([latest-time (latest-loan-time loans)]
+                            [latest-debt (time->debt latest-time loans)])
+                        (if (> debt )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
+
         (withdraw-loan-command (customer-id) 12
         )
       )
