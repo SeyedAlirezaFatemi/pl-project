@@ -98,9 +98,9 @@
       (a-customer (id type initial-amount amount
                   deadline-month credit-counter credit
                   interest-rate loans minimum-amount blocked-money creation-time)
-        (let ([new-customer (a-customer (id type initial-amount amount
+        (let ([new-customer (a-customer id type initial-amount amount
                                         deadline-month credit-counter credit
-                                        interest-rate (modify-loan loan loans) minimum-amount blocked-money creation-time))])
+                                        interest-rate (modify-loan loan loans) minimum-amount blocked-money creation-time)])
           (save-customer new-customer)
         ) 
       )
