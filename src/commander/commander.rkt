@@ -6,6 +6,7 @@
 (require "../io/in.rkt")
 (require "../commander/Command.rkt")
 (require "../states/Customer.rkt")
+(require "../states/LoanState.rkt")
 (require "../blueprints/Account.rkt")
 (require "../blueprints/Loan.rkt")
 (require "../blueprints/Task.rkt")
@@ -18,14 +19,32 @@
 (define tasks '())
 (define month-number 0)
 
+(define log
+  (lambda (before current-command current-customers current-tasks current-month-number)
+    (begin
+      (pretty-display "**********")
+      (if before
+        (pretty-display "Before: ")
+        (pretty-display "After: ")
+      )
+      (pretty-display current-command)
+      (pretty-display "Customers: ")
+      (pretty-display current-customers)
+      (pretty-display "Tasks: ")
+      (pretty-display current-tasks)
+      (pretty-display "**********")
+    )
+  )
+)
+
 (define get-account-type
   (lambda (search-id account-type-list)
     (if (null? account-type-list)
-      (begin (raise 'account-not-found))
-      (let ([acc (car account-type-list)])
-        (let ([acc-id (account->id acc)])
-          (if (= acc-id search-id)
-            acc
+      (raise 'account-not-found)
+      (let ([account (car account-type-list)])
+        (let ([account-id (account->id account)])
+          (if (= account-id search-id)
+            account
             (get-account-type search-id (cdr account-type-list))
           )
         )
@@ -53,7 +72,7 @@
 (define get-customer
   (lambda (search-id customer-list)
     (if (null? customer-list)
-      (begin (raise 'customer-not-found))
+      (raise 'customer-not-found)
       (let ([customer (car customer-list)])
         (let ([customer-id (customer->id customer)])
           (if (= customer-id search-id)
@@ -264,7 +283,7 @@
       (cases Command command
         (time-command ()
           (begin
-            (do-tasks)
+            (do-tasks tasks)
             (set! month-number (+ month-number 1))
           )
         )
@@ -290,8 +309,9 @@
                       )])
                   (begin
                     (set! customers (cons new-customer customers))
-                    (pretty-display 'account-created!) ; LOG
-                    (newline)                   ; LOG
+                    ; log
+                    (pretty-display "New customer:")
+                    (pretty-display new-customer)
                   )
                 )
               )
@@ -650,11 +670,9 @@
     (if (null? commands)
       customers
       (begin
+        (log #t (car commands) customers tasks month-number)
         (do-command (car commands))
-        (pretty-display month-number)                   ; LOG
-        (newline)                                       ; LOG
-        (pretty-display customers)                      ; LOG
-        (newline)                                       ; LOG
+        (log #f (car commands) customers tasks month-number)
         (do-commands (cdr commands))
       )
     )
@@ -664,8 +682,8 @@
 (define work-on-commands
   (lambda (ls as cs)
     (begin
-      (pretty-display 'Started!!)                      ; LOG
-      (newline)                                        ; LOG
+      (pretty-display "@@@@@@@@@@")                      ; LOG
+      (pretty-display "Processing commands...")                      ; LOG
       (set! account-types as)
       (set! loan-types ls)
       (set! commands cs)

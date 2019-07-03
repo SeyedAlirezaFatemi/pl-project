@@ -1,6 +1,8 @@
 #lang racket
 
+
 (provide (all-defined-out))
+(require eopl)
 (require "../states/LoanState.rkt")
 
 (define latest-loan-time
@@ -47,7 +49,7 @@
     (if (null? loans)
       0
       (cases LoanState (car loans)
-        (a-loan-state (time type debt)
+        (a-loan-state (time type debt is-withdrawn)
           (if (equal? spec-time time)
             debt
             (time->debt spec-time (cdr loans))
