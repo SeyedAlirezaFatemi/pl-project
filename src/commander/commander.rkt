@@ -698,7 +698,8 @@
                                     interest-rate loans minimum-amount blocked-money creation-time)
                           (save-customer (an-account id type initial-amount (- amount (loan->amount))
                                                      deadline-month credit-counter credit
-                                                     interest-rate (flip-first-not-withdrawn-loan loans) minimum-amount blocked-money creation-time))
+                                                     interest-rate (flip-first-not-withdrawn-loan loans)
+                                                     minimum-amount blocked-money creation-time))
                         )
                       )
                     )

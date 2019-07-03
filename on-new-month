@@ -1,11 +1,10 @@
 on new month:
-	month++
+	month++											[Done!]
 	smin minimum money for annual accounts
 	increase interests
 	increase credits
 	check loans with passed deadline
-	add last month's accepted loans to accounts
-	interests
+	add last month's accepted loans to accounts		[Done!]
+	interests										[Done!]
 		montly
 		annual
-	
