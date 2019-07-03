@@ -6,6 +6,7 @@
 (require "../io/in.rkt")
 (require "../commander/Command.rkt")
 (require "../states/Customer.rkt")
+(require "../states/LoanState.rkt")
 (require "../blueprints/Account.rkt")
 (require "../blueprints/Loan.rkt")
 (require "../blueprints/Task.rkt")
@@ -21,11 +22,11 @@
 (define get-account-type
   (lambda (search-id account-type-list)
     (if (null? account-type-list)
-      (begin (raise 'account-not-found))
-      (let ([acc (car account-type-list)])
-        (let ([acc-id (account->id acc)])
-          (if (= acc-id search-id)
-            acc
+      (raise 'account-not-found)
+      (let ([account (car account-type-list)])
+        (let ([account-id (account->id account)])
+          (if (= account-id search-id)
+            account
             (get-account-type search-id (cdr account-type-list))
           )
         )
@@ -53,7 +54,7 @@
 (define get-customer
   (lambda (search-id customer-list)
     (if (null? customer-list)
-      (begin (raise 'customer-not-found))
+      (raise 'customer-not-found)
       (let ([customer (car customer-list)])
         (let ([customer-id (customer->id customer)])
           (if (= customer-id search-id)
