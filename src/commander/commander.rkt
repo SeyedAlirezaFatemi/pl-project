@@ -7,13 +7,14 @@
 (require "../states/Customer.rkt")
 (require "../blueprints/Account.rkt")
 (require "../blueprints/Loan.rkt")
+(require "../blueprints/ToDo.rkt")
 (require "../utils/helpers.rkt")
 
 (define loan-types '())
 (define account-types '())
 (define commands '())
 (define customers '())
-(define to-do '())
+(define to-dos '())
 (define month-number 0)
 
 ;(define exn-test
@@ -172,7 +173,19 @@
 )
 
 (define create-loan
-  (lambda )
+  (lambda (customer loan-type)
+    (let ([amount (loan->amount loan-type)])
+      (add-to-do (give-loan amount))
+    )
+  )
+)
+
+(define add-to-do
+  (lambda (new-to-do)
+    (set! to-dos (cons new-to-do to-dos))
+    (display "New ToDo added.")
+    (display new-to-do)
+  )
 )
 
 (define do-command
@@ -454,13 +467,13 @@
                 )
               (if (latest-loan-time (customer->loans customer))
                 (if (> month-number (+ (latest-loan-time (customer->loans customer)) (loan->last-loan-span loan)))
-                  4 ;Ok
+                  (create-loan customer loan)
                   (begin
                     (display "Request for loan denied.")
                     (display command)
                   )
                 ) 
-                4 ;Ok
+                (create-loan customer loan)
               )
               (begin
                 (display "Request for loan denied.")
