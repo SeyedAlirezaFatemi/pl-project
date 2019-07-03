@@ -22,18 +22,19 @@
 (define log
   (lambda (before current-command current-customers current-tasks current-month-number)
     (begin
+      (pretty-display "**********")
       (if before
-        '()
-        (begin (display "State: ")
-        (pretty-display current-command)
-        (display "Current Month: ")
-        (pretty-display month-number)
-        (display "Customers: ")
-        (pretty-display current-customers)
-        (display "Tasks: ")
-        (pretty-display current-tasks)
-        (pretty-display "**********") )
+        (pretty-display "Before: ")
+        (pretty-display "After: ")
       )
+      (pretty-display current-command)
+      (pretty-display "Current Month:")
+      (pretty-display month-number)
+      (pretty-display "Customers: ")
+      (pretty-display current-customers)
+      (pretty-display "Tasks: ")
+      (pretty-display current-tasks)
+      (pretty-display "**********")
     )
   )
 )
@@ -63,6 +64,28 @@
           (if (= loan-id search-id)
             loan
             (get-loan-type search-id (cdr loan-type-list))
+          )
+        )
+      )
+    )
+  )
+)
+
+(define remove-loan
+  (lambda (loan loan-list)
+    (if (null? loan-list)
+      (raise 'loan-not-found-for-remove)
+      (cases LoanState loan
+        (a-loan-state (time type debt is-withdrawn)
+          (let ([head (car loan-list)])
+            (cases LoanState head
+              (a-loan-state (head-time head-type head-debt head-is-withdrawn)
+                (if (= head-time time)
+                  (cdr loan-list)
+                  (cons head (modify-loan loan (cdr loan-list)))
+                )
+              )
+            )
           )
         )
       )
@@ -261,6 +284,7 @@
             )
           )
         )
+        (do-tasks (cdr current-tasks))
       )
     )
   )
@@ -762,40 +786,32 @@
               (pretty-display "You don't have enough money in your account.")
               (begin
                 (cases Customer customer
-                  (a-customer (id type initial-amount account-amount
-                              deadline-month credit-counter credit
-                              interest-rate loans minimum-amount blocked-money creation-time)
-                    (let ([modified-customer
-                      (a-customer id type initial-amount
-                        (- account-amount amount)
-                        deadline-month
-                        credit-counter credit
-                        interest-rate loans minimum-amount blocked-money creation-time
-                      )])
-                      (let ([latest-loan (latest-loan loans)])
-                        (cases LoanState latest-loan
-                          (a-loan-state (time type debt is-withdrawn)
-                            (if (>= debt amount)
-                              (let* ([modified-loan
-                                (a-loan-state time type (- debt amount) is-withdrawn)]
-                                [extra (- amount debt)]
-                                [modified-loan-2
-                                (a-loan-state time type 0 is-withdrawn)]
-                                [modified-customer-2
-                                (a-customer id type initial-amount (+ amount extra)
-                                deadline-month credit-counter credit
-                                interest-rate loans minimum-amount blocked-money creation-time)]
-                                )
-                                (begin
-                                  (save-customer modified-customer)
-                                  (save-loan modified-loan modified-customer customers)
-                                )
-                                (begin
-                                  (save-customer modified-customer-2)
-                                  (save-loan modified-loan-2 modified-customer-2 customers)
-                                )
-                              )
-                              (pretty-display "NO.")
+                  (a-customer (id account-type initial-amount account-amount
+                               deadline-month credit-counter credit
+                               interest-rate loans minimum-amount blocked-money creation-time)
+                    (let ([latest-loan (latest-loan loans)])
+                      (cases LoanState latest-loan
+                        (a-loan-state (time type debt is-withdrawn)
+                          (if (<= debt amount)
+                            (let ([modified-customer
+                              (a-customer id type initial-amount
+                                (+ (- account-amount debt) (loan->blocked-amount (get-loan-type type loan-types)))
+                                deadline-month
+                                credit-counter credit
+                                interest-rate (remove-loan latest-loan loans) minimum-amount
+                                (- blocked-money (loan->blocked-amount (get-loan-type type loan-types))) creation-time
+                              )])
+                              (save-customer modified-customer)  
+                            )
+                            (let ([modified-customer
+                              (a-customer id type initial-amount
+                                (- account-amount debt)
+                                deadline-month
+                                credit-counter credit
+                                interest-rate (modify-loan (a-loan-state time type (- debt amount) is-withdrawn) loans) minimum-amount
+                                blocked-money creation-time
+                              )])
+                              (save-customer modified-customer)  
                             )
                           )
                         )
