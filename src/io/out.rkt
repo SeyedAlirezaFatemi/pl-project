@@ -46,7 +46,8 @@
             (display "\t" out)            
             (write blocked-money out)
             (display "\t" out)            
-            ; loan deadline time
+            (write (+ (time->deadline (latest-loan-time loans) loans loan-types) (time->time (latest-loan-time loans) loans loan-types)) out)
+            (display "\t" out)            
             (write (sum-of-debts loans 0) out)
             (newline out)
             (write-customers account-types loan-types (cdr customers) out)
@@ -91,6 +92,30 @@
       (if (equal? spec-time (loan-state->time (car loans)))
         (loan->amount (get-loan-type (loan-state->type (car loans)) loan-types) )
         (time->amount spec-time (cdr loans))
+      )
+    )
+  )
+)
+
+(define time->time
+  (lambda (spec-time loans loan-types)
+    (if (null? loans)
+      0
+      (if (equal? spec-time (loan-state->time (car loans)))
+        (loan-state->time (car loans))
+        (time->time spec-time (cdr loans))
+      )
+    )
+  )
+)
+
+(define time->deadline
+  (lambda (spec-time loans loan-types)
+    (if (null? loans)
+      0
+      (if (equal? spec-time (loan-state->time (car loans)))
+        (loan->return-span (get-loan-type (loan-state->type (car loans)) loan-types) )
+        (time->deadline spec-time (cdr loans))
       )
     )
   )
