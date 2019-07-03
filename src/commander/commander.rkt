@@ -163,14 +163,6 @@
   )
 )
 
-(define save-loan
-  (lambda (loan)
-    (begin
-      (set! loans (modify-loan loan loans))
-    )
-  )
-)
-
 (define punish
   (lambda (customer account)
     (cases Customer customer
@@ -633,7 +625,7 @@
               (pretty-display "You don't have enoygh money in your account.")
               (begin
                 (cases Customer customer
-                  (a-customer (id type initial-amount amount
+                  (a-customer (id type initial-amount account-amount
                               deadline-month credit-counter credit
                               interest-rate loans minimum-amount blocked-money creation-time)
                     (let ([modified-customer
