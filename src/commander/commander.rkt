@@ -175,7 +175,7 @@
 (define create-loan
   (lambda (customer loan-type)
     (let ([amount (loan->amount loan-type)])
-      (add-to-do (give-loan amount))
+      (add-to-do (give-loan customer amount))
     )
   )
 )
@@ -185,6 +185,19 @@
     (set! to-dos (cons new-to-do to-dos))
     (display "New ToDo added.")
     (display new-to-do)
+  )
+)
+
+(define do-tasks
+  (lambda (tasks)
+    (if (null? tasks)
+      #t ; We're done
+      (let ([current-task (car tasks)])
+        (cases ToDo current-task
+          (give-loan (amount))
+        )
+      )
+    )
   )
 )
 
