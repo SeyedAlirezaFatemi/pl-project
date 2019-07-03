@@ -197,7 +197,7 @@
                       deadline-month
                       0
                       (- credit (/ account-credit 2))
-                      interest-rate loans minimum-amount blocked-money month-number
+                      interest-rate loans minimum-amount blocked-money creation-time
                   )])
                 (begin
                   (save-customer modified-customer)
@@ -521,7 +521,7 @@
                                         amount
                                         (+ month-number period)
                                         credit-counter credit
-                                        interest-rate loans minimum-amount blocked-money
+                                        interest-rate loans minimum-amount blocked-money creation-time
                             )])
                             (begin
                               (save-customer modified-customer)
@@ -561,7 +561,7 @@
                                         (- amount cheque-amount)
                                         deadline-month
                                         credit-counter credit
-                                        interest-rate loans minimum-amount blocked-money
+                                        interest-rate loans minimum-amount blocked-money creation-time
                             )])
                             (begin
                               (save-customer modified-customer)
@@ -791,8 +791,7 @@
                                   (save-loan modified-loan-2 modified-customer-2 customers)
                                 )
                               )
-                              ; TODO @estri
-                              3
+                              (pretty-display "NO.")
                             )
                           )
                         )
