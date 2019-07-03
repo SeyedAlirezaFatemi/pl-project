@@ -188,11 +188,11 @@
                   interest-rate loans minimum-amount blocked-money creation-time)
         (let ([account (get-customers-account customer)])
           (cases Account account
-            (an-account  (id has-interest fee minimum-deposit monthly
-                          period renewable interest-rate account-credit has-variable-interest
+            (an-account  (account-id has-interest fee minimum-deposit monthly
+                          period renewable account-interest-rate account-credit has-variable-interest
                           span-for-increase increase-rate has-cheque has-card transfer-fee)
               (let ([modified-customer
-                  (a-customer id type initial-amount
+                  (a-customer customer-id type initial-amount
                       amount
                       deadline-month
                       0
@@ -513,8 +513,8 @@
                   (raise 'wait-for-the-deadline)
                   (let ([account (get-customers-account customer)])
                     (cases Account account
-                      (an-account  (id has-interest fee minimum-deposit monthly
-                                    period renewable interest-rate credit has-variable-interest
+                      (an-account  (account-id has-interest fee minimum-deposit monthly
+                                    period renewable account-interest-rate account-credit has-variable-interest
                                     span-for-increase increase-rate has-cheque has-card transfer-fee)
                         (if renewable
                           (let ([modified-customer
@@ -552,8 +552,8 @@
                           interest-rate loans minimum-amount blocked-money creation-time)
                 (let ([account (get-customers-account customer)])
                   (cases Account account
-                    (an-account  (id has-interest fee minimum-deposit monthly
-                                  period renewable interest-rate credit has-variable-interest
+                    (an-account  (account-id has-interest fee minimum-deposit monthly
+                                  period renewable account-interest-rate account-credit has-variable-interest
                                   span-for-increase increase-rate has-cheque has-card transfer-fee)
                       (if has-cheque
                         (if (>= (- amount cheque-amount) minimum-deposit)
@@ -597,8 +597,8 @@
                           interest-rate loans minimum-amount blocked-money creation-time)
                 (let ([account (get-customers-account customer)])
                   (cases Account account
-                    (an-account  (id has-interest fee minimum-deposit monthly
-                                  period renewable interest-rate credit has-variable-interest
+                    (an-account  (account-id has-interest fee minimum-deposit monthly
+                                  period renewable account-interest-rate account-credit has-variable-interest
                                   span-for-increase increase-rate has-cheque has-card transfer-fee)
                       (if has-card
                         (if (>= (- amount card-amount) minimum-deposit)
@@ -642,8 +642,8 @@
                           interest-rate loans minimum-amount blocked-money creation-time)
                 (let ([account (get-customers-account customer)])
                   (cases Account account
-                    (an-account  (id has-interest fee minimum-deposit monthly
-                                  period renewable interest-rate credit has-variable-interest
+                    (an-account  (account-id has-interest fee minimum-deposit monthly
+                                  period renewable account-interest-rate account-credit has-variable-interest
                                   span-for-increase increase-rate has-cheque has-card transfer-fee)
                       (if has-card
                         (if (>= (- amount transfer-amount) minimum-deposit)
@@ -687,8 +687,8 @@
                           interest-rate loans minimum-amount blocked-money creation-time)
                 (let ([account (get-customers-account customer)])
                   (cases Account account
-                    (an-account  (id has-interest fee minimum-deposit monthly
-                                  period renewable interest-rate credit has-variable-interest
+                    (an-account  (account-id has-interest fee minimum-deposit monthly
+                                  period renewable account-interest-rate account-credit has-variable-interest
                                   span-for-increase increase-rate has-cheque has-card transfer-fee)
                       (if has-card
                         (if (>= (- amount withdraw-amount) minimum-deposit)
