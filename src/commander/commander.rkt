@@ -756,7 +756,7 @@
           (let* ([customer (get-customer customer-id customers)]
                  [account-amount (customer->amount customer)])
             (if (> amount account-amount)
-              (pretty-display "You don't have enoygh money in your account.")
+              (pretty-display "You don't have enough money in your account.")
               (begin
                 (cases Customer customer
                   (a-customer (id type initial-amount account-amount
