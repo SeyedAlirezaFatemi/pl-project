@@ -28,6 +28,8 @@
         (pretty-display "After: ")
       )
       (pretty-display current-command)
+      (pretty-display "Current Month:")
+      (pretty-display month-number)
       (pretty-display "Customers: ")
       (pretty-display current-customers)
       (pretty-display "Tasks: ")
@@ -64,6 +66,44 @@
             (get-loan-type search-id (cdr loan-type-list))
           )
         )
+      )
+    )
+  )
+)
+
+(define modify-loan
+  (lambda (loan loan-list)
+    (if (null? loan-list)
+      (raise 'loan-not-found-for-save)
+      (cases LoanState loan
+        (a-loan-state (time type debt is-withdrawn)
+          (let ([head (car loan-list)])
+            (cases LoanState head
+              (a-loan-state (head-time head-type head-debt head-is-withdrawn)
+                (if (= head-time time)
+                  (cons loan (cdr loan-list))
+                  (cons head (modify-loan loan (cdr loan-list)))
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+(define save-loan
+  (lambda (loan customer customers)
+    (cases Customer customer
+      (a-customer (id type initial-amount amount
+                  deadline-month credit-counter credit
+                  interest-rate loans minimum-amount blocked-money creation-time)
+        (let ([new-customer (a-customer (id type initial-amount amount
+                                        deadline-month credit-counter credit
+                                        interest-rate (modify-loan loan loans) minimum-amount blocked-money creation-time))])
+          (save-customer new-customer)
+        ) 
       )
     )
   )
@@ -137,28 +177,6 @@
   (lambda (customer)
     (begin
       (set! customers (modify-customer customer customers))
-    )
-  )
-)
-
-(define modify-loan
-  (lambda (loan loan-list)
-    (if (null? loan-list)
-      (raise 'loan-not-found-for-save)
-      (cases LoanState loan
-        (a-loan-state (time type debt is-withdrawn)
-          (let ([head (car loan-list)])
-            (cases LoanState head
-              (a-loan-state (head-time head-type head-debt head-is-withdrawn)
-                (if (= head-time time)
-                  (cons loan (cdr loan-list))
-                  (cons head (modify-loan loan (cdr loan-list)))
-                )
-              )
-            )
-          )
-        )
-      )
     )
   )
 )
@@ -280,38 +298,79 @@
   )
 )
 
+; TODO: check period.
 (define pay-interests
   (lambda (month-number customers)
     (if (null? customers)
       #t ; Done
-      (let ([current-customer (car customers)])
-        (cases Customer current-customer
-          (a-customer (id type initial-amount current-amount
-                       deadline-month credit-counter credit
-                       interest-rate loans minimum-amount blocked-money creation-time)
-            (let* ([interest (calculate-interest interest-rate minimum-amount (account->monthly (get-account-type type)))]
-                   [monthly (account->monthly (get-account-type type))])
-              (if monthly
-                (save-customer (a-customer (id type initial-amount (+ interest current-amount)
-                                            deadline-month credit-counter credit
-                                            interest-rate loans (+ interest current-amount) blocked-money creation-time)))
-                (if (= 0 (modulo (- month-number creation-time) 12))
-                  (begin
-                    (save-customer (a-customer (id type initial-amount (+ interest current-amount)
-                                                deadline-month credit-counter credit
-                                                interest-rate loans (+ interest current-amount) blocked-money creation-time)))
-                    (pretty-display "^^^^^^^^^^")
-                    (pretty-display "Interest time:")
-                    (pretty-display current-customer)
-                    (pretty-display interest)
-                    (pretty-display "^^^^^^^^^^")
+      (begin 
+        (let ([current-customer (car customers)])
+          (cases Customer current-customer
+            (a-customer (id type initial-amount current-amount
+                        deadline-month credit-counter credit
+                        interest-rate loans minimum-amount blocked-money creation-time)
+              (let* ([interest (calculate-interest interest-rate minimum-amount (account->monthly (get-account-type type account-types)))]
+                    [monthly (account->monthly (get-account-type type account-types))])
+                (if monthly
+                  (save-customer (a-customer id type initial-amount (+ interest current-amount)
+                                              deadline-month credit-counter credit
+                                              interest-rate loans (+ interest current-amount) blocked-money creation-time))
+                  (if (= 0 (modulo (- month-number creation-time) 12))
+                    (begin
+                      (save-customer (a-customer id type initial-amount (+ interest current-amount)
+                                                  deadline-month credit-counter credit
+                                                  interest-rate loans (+ interest current-amount) blocked-money creation-time))
+                      ; Log
+                      (pretty-display "^^^^^^^^^^")
+                      (pretty-display "Interest time:")
+                      (pretty-display current-customer)
+                      (pretty-display interest)
+                      (pretty-display "^^^^^^^^^^")
+                    )
+                    #t ; Done  
                   )
-                  #t ; Done  
                 )
               )
             )
           )
         )
+        (pay-interests month-number (cdr customers))
+      )
+    )
+  )
+)
+
+(define increase-credits
+  (lambda (month-number customers)
+    (if (null? customers)
+      #t ; Done
+      (begin
+        (let ([current-customer (car customers)])
+          (cases Customer current-customer
+            (a-customer (id type initial-amount current-amount
+                        deadline-month credit-counter credit
+                        interest-rate loans minimum-amount blocked-money creation-time)
+              (if (= 0 (modulo (- month-number creation-time) 12))
+                (if (= 0 (- month-number creation-time))
+                  #t ; Done
+                  (begin
+                    (save-customer (a-customer id type initial-amount current-amount
+                                                deadline-month credit-counter (+ credit (account->credit (get-account-type type account-types)))
+                                                interest-rate loans current-amount blocked-money creation-time))
+                    ; Log
+                    (pretty-display "<><><><><>")
+                    (pretty-display "Credit time:")
+                    (pretty-display current-customer)
+                    (pretty-display (+ credit (account->credit (get-account-type type account-types))))
+                    (pretty-display "<><><><><>")
+                  )
+                )
+                #t ; Done  
+              )
+            )
+          )
+        )
+        (increase-credits month-number (cdr customers))
       )
     )
   )
@@ -325,6 +384,7 @@
           (begin
             ; Update minimum amount of customers based on monthly or yearly
             (pay-interests month-number customers)
+            (increase-credits month-number customers)
             (do-tasks tasks)
             (set! month-number (+ month-number 1))
           )
@@ -375,10 +435,14 @@
                     )])
                   (begin
                     (save-customer modified-customer)
-                    (pretty-display add-amount)
-                    (pretty-display "$ added to the account of customer #")
-                    (pretty-display customer-id)
+                    ; Log
+                    (pretty-display "##########")
+                    (pretty-display "New Deposit:")
+                    (display add-amount)
+                    (display "$ added to the account of customer #")
+                    (display customer-id)
                     (newline)
+                    (pretty-display "##########")
                   )
                 )
               )
@@ -408,9 +472,12 @@
                             )])
                             (begin
                               (save-customer modified-customer)
-                              (pretty-display "We have the renewal of customer #")
-                              (pretty-display customer-id)
+                              (pretty-display "!!!!!!!!!!")
+                              (pretty-display "Renewal:")
+                              (display "We have the renewal of customer #")
+                              (display customer-id)
                               (newline)
+                              (pretty-display "!!!!!!!!!!")
                             )
                           )
                           (raise 'not-renewable)
@@ -445,10 +512,13 @@
                             )])
                             (begin
                               (save-customer modified-customer)
-                              (pretty-display cheque-amount)
-                              (pretty-display "$ is paid by cheque by customer #")
-                              (pretty-display customer-id)
+                              (pretty-display "&&&&&&&&&&")
+                              (pretty-display "Cheque:")
+                              (display cheque-amount)
+                              (display "$ is paid by cheque by customer #")
+                              (display customer-id)
                               (newline)
+                              (pretty-display "&&&&&&&&&&")
                             )
                           )
                           (raise 'not-enough-money-for-cheque)
@@ -487,10 +557,13 @@
                             )])
                               (begin
                                 (save-customer modified-customer)
-                                (pretty-display card-amount)
-                                (pretty-display "$ is paid by card by customer #")
-                                (pretty-display customer-id)
+                                (pretty-display "~~~~~~~~~~")
+                                (pretty-display "Card:")
+                                (display card-amount)
+                                (display "$ is paid by card by customer #")
+                                (display customer-id)
                                 (newline)
+                                (pretty-display "~~~~~~~~~~")
                               )
                           )
                           (raise 'not-enough-money-for-card)
@@ -529,10 +602,13 @@
                             )])
                             (begin
                               (save-customer modified-customer)
-                              (pretty-display transfer-amount)
-                              (pretty-display "$ is paid by transfer command by customer #")
-                              (pretty-display customer-id)
+                              (pretty-display "->->->->->")
+                              (pretty-display "Transfer:")
+                              (display transfer-amount)
+                              (display "$ is paid by transfer command by customer #")
+                              (display customer-id)
                               (newline)
+                              (pretty-display "->->->->->")
                             )
                           )
                           (raise 'not-enough-money-for-transfer)
@@ -571,10 +647,13 @@
                             )])
                             (begin
                               (save-customer modified-customer)
-                              (pretty-display withdraw-amount)
-                              (pretty-display "$ is paid by withdraw command by customer #")
-                              (pretty-display customer-id)
+                              (pretty-display "$$$$$$$$$$")
+                              (pretty-display "Withdrawal:")
+                              (display withdraw-amount)
+                              (display "$ is paid by withdraw command by customer #")
+                              (display customer-id)
                               (newline)
+                              (pretty-display "$$$$$$$$$$")
                             )
                           )
                           (raise 'not-enough-money-for-withdraw)
@@ -596,7 +675,7 @@
         )
         (request-loan-command (customer-id loan-type) 
           (let* ([customer (get-customer customer-id customers)]
-                 [loan (get-loan-type loan-type)])
+                 [loan (get-loan-type loan-type loan-types)])
             (if (and 
                   (>= (customer->amount customer) (loan->blocked-amount loan))
                   (>= (customer->credit customer) (loan->minimum-credit loan))
@@ -613,6 +692,8 @@
               )
               (begin
                 (pretty-display "Request for loan denied.")
+                (pretty-display "We are fucked.")
+                (pretty-display loan)
                 (pretty-display command)
               )
             )
@@ -650,12 +731,12 @@
                                 interest-rate loans minimum-amount blocked-money creation-time)]
                                 )
                                 (begin
-                                  (save-loan modified-loan loans)
                                   (save-customer modified-customer customers)
+                                  (save-loan modified-loan modified-customer customers)
                                 )
                                 (begin
-                                  (save-loan modified-loan-2 loans)
                                   (save-customer modified-customer-2 customers)
+                                  (save-loan modified-loan-2 modified-customer-2 customers)
                                 )
                               )
                               ; TODO @estri

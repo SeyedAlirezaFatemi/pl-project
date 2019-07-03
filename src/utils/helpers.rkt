@@ -15,7 +15,10 @@
           (let ([rest-time (latest-loan-time (cdr loan-states))])
             (if (> time rest-time)
               time
-              rest-time
+              (if rest-time
+                rest-time
+                0
+              )
             )
           )
         )
@@ -34,7 +37,10 @@
           (let ([rest-time (latest-loan-time (cdr loan-states))])
             (if (> time rest-time)
               (car loan-states)
-              (latest-loan (cdr loan-states))
+              (if (latest-loan (cdr loan-states))
+                (latest-loan (cdr loan-states))
+                0
+              )
             )
           )
         )
