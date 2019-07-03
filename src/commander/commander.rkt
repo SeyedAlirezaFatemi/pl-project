@@ -75,14 +75,10 @@
     (if (null? customer-list)
       (begin (raise 'customer-not-found))
       (let ([customer (car customer-list)])
-        (cases Customer customer
-          (a-customer (id type initial-amount amount 
-                       deadline-month credit-counter credit 
-                       interest-rate loans minimum-amount blocked-money)
-            (if (= id search-id)
-              customer
-              (get-customer search-id (cdr customer-list))
-            )
+        (let ([customer-id (customer->id customer)])
+          (if (= customer-id search-id)
+            customer
+            (get-customer search-id (cdr customer-list))
           )
         )
       )
