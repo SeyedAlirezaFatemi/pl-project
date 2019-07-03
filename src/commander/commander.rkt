@@ -173,9 +173,9 @@
 )
 
 (define create-loan
-  (lambda (customer loan-type)
-    (let ([amount (loan->amount loan-type)])
-      (add-to-do (give-loan customer amount))
+  (lambda (customer loan)
+    (let ([amount (loan->amount loan)])
+      (add-to-do (give-loan customer loan))
     )
   )
 )
@@ -191,10 +191,20 @@
 (define do-tasks
   (lambda (tasks)
     (if (null? tasks)
-      #t ; We're done
+      (set! to-dos '()) ; We're done
       (let ([current-task (car tasks)])
         (cases ToDo current-task
-          (give-loan (amount))
+          (give-loan (customer loan) 
+            (cases Customer customer
+              (a-customer (id type initial-amount current-amount 
+                           deadline-month credit-counter credit 
+                           interest-rate loans minimum-amount blocked-money)
+                (save-customer (an-account id type initial-amount (+ (loan->amount loan) current-amount) 
+                                           deadline-month credit-counter (- credit (loan->minimum-credit loan))
+                                           interest-rate loans minimum-amount (+ blocked-money (loan->blocked-amount loan))) customers)
+              )
+            )
+          )
         )
       )
     )
