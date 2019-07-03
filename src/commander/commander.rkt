@@ -117,14 +117,10 @@
     (if (null? customer-list)
       (raise 'customer-not-found-for-deletion)
       (let ([head (car customer-list)])
-        (cases Customer head
-          (a-customer (head-id head-type head-initial-amount head-amount
-                       head-deadline-month head-credit-counter head-credit
-                       head-interest-rate head-loans head-minimum-amount head-blocked-money)
-            (if (= head-id search-id)
-              (cdr customer-list)
-              (cons head (delete-customer search-id (cdr customer-list)))
-            )
+        (let ([head-id (customer->id head)])
+          (if (= head-id search-id)
+            (cdr customer-list)
+            (cons head (delete-customer search-id (cdr customer-list)))
           )
         )
       )
