@@ -186,7 +186,7 @@
                 (save-customer (an-account id type initial-amount (+ (loan->amount loan) current-amount) 
                                            deadline-month credit-counter (- credit (loan->minimum-credit loan))
                                            interest-rate (append loans (list (a-loan-state month-number (loan->id loan) (loan->amount loan) #f))) 
-                                           minimum-amount (+ blocked-money (loan->blocked-amount loan))) customers)
+                                           minimum-amount (+ blocked-money (loan->blocked-amount loan))))
               )
             )
           )
@@ -558,15 +558,26 @@
           (let ([customer (get-customer customer-id customers)])
             (let ([loans (customer->loans customer)])
               (if (null? loans)
+                ; No loan to withdraw
                 (begin
                   (pretty-display "Customer has no loan to withdraw.")
                   (pretty-display command)
                 )
+                ; Find a suitable loan to withdraw
                 (let ([found (find-first-not-withdrawn-loan loans)])
                   (if found
                     (let ([loan-type (get-loan-type (loan-state->type found) loan-types)])
-                      ; Update customer and its loans
+                      (cases Customer customer
+                        (a-customer (id type initial-amount amount
+                                    deadline-month credit-counter credit
+                                    interest-rate loans minimum-amount blocked-money)
+                          (save-customer (an-account id type initial-amount (- amount (loan->amount))
+                                                     deadline-month credit-counter credit
+                                                     interest-rate (flip-first-not-withdrawn-loan loans) minimum-amount blocked-money))
+                        )
+                      )
                     )
+                    ; All loans are withdrawn
                     (begin 
                       (pretty-display "Nothing to withdraw!")
                       (pretty-display command)
