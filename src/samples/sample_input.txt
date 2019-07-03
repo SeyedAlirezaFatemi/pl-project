@@ -1,35 +1,18 @@
-
-
 commands
 Time goes by.
-
-Time goes by.
-
 Time goes by.
 Time goes by.
-
-
-
 Time goes by.
-
-
-
 Time goes by.
-
-
-
+Time goes by.
 Time goes by.
 Customer 1 wants to create an account of type 1. Customer 1 wants to start with 510000 Tomans.
-
-
 Time goes by.
 Time goes by.
-
 Time goes by.
 Time goes by.
 Time goes by.
 Customer 2 wants to create an account of type 1. Customer 2 wants to start with 30000 Tomans.
-
 Time goes by.
 Time goes by.
 
@@ -121,6 +104,8 @@ Time goes by.
 Time goes by.
 
 Customer 1 pays 1000000 Tomans of his debt.
+
+
 
 
 

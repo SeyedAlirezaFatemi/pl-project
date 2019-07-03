@@ -24,13 +24,13 @@
     (begin
       (if before
         '()
-        (begin (pretty-display "State: ")
+        (begin (display "State: ")
         (pretty-display current-command)
-        (pretty-display "Current Month:")
+        (display "Current Month: ")
         (pretty-display month-number)
-        (pretty-display "Customers: ")
+        (display "Customers: ")
         (pretty-display current-customers)
-        (pretty-display "Tasks: ")
+        (display "Tasks: ")
         (pretty-display current-tasks)
         (pretty-display "**********") )
       )
@@ -453,6 +453,8 @@
                     (set! customers (cons new-customer customers))
                     ; log
                     (pretty-display "New customer:")
+                    (display "=>")
+                    (pretty-display interest-rate)
                     (pretty-display new-customer)
                   )
                 )
