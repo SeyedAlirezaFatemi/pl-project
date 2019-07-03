@@ -122,6 +122,36 @@
   )
 )
 
+(define modify-loan
+  (lambda (loan loan-list)
+    (if (null? loan-list)
+      (raise 'loan-not-found-for-save)
+      (cases LoanState loan
+        (a-loan-state (time type debt is-withdrawn)
+          (let ([head (car loan-list)])
+            (cases LoanState head
+              (a-loan-state (head-time head-type head-debt head-is-withdrawn)
+                (if (= head-time time)
+                  (cons loan (cdr loan-list))
+                  (cons head (modify-loan loan (cdr loan-list)))
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+(define save-loan
+  (lambda (loan)
+    (begin
+      (set! loans (modify-loan loan loans))
+    )
+  )
+)
+
 (define punish
   (lambda (customer account)
     (cases Customer customer
@@ -542,9 +572,31 @@
                         credit-counter credit
                         interest-rate loans minimum-amount blocked-money
                       )])
-                      (let* ([latest-time (latest-loan-time loans)]
-                            [latest-debt (time->debt latest-time loans)])
-                        (if (> debt )
+                      (let ([latest-loan (latest-loan loans)])
+                        (cases LoanState latest-loan
+                            (a-loan-state (time type debt is-withdrawn)
+                              (if (>= debt amount)
+                                (let* ([modified-loan
+                                  (a-loan-state time type (- debt amount) is-withdrawn)]
+                                  [extra (- amount debt)]
+                                  [modified-loan-2 
+                                  (a-loan-state time type 0 is-withdrawn)]
+                                  [modified-customer-2
+                                  (a-customer id type initial-amount (+ amount extra)
+                                  deadline-month credit-counter credit
+                                  interest-rate loans minimum-amount blocked-money)]
+                                  )
+                                  (begin
+                                    (save-loan modified-loan loans)
+                                    (save-customer modified-customer customers)
+                                  )
+                                  (begin
+                                    (save-loan modified-loan-2 loans)
+                                    (save-customer modified-customer-2 customers)
+                                  )
+                                )
+                              )
+                            )
                         )
                       )
                     )
@@ -552,7 +604,7 @@
                 )
               )
             )
-          )
+          ) 
         )
         (withdraw-loan-command (customer-id)
           (let ([customer (get-customer customer-id customers)])
