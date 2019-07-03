@@ -7,7 +7,7 @@
     (time integer?) ; Start
     (type integer?)
     (debt integer?)
-    (is-withdrawn integer?)
+    (is-withdrawn boolean?)
   )
 )
 

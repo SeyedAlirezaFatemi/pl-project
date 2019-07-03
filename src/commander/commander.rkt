@@ -198,7 +198,8 @@
                            interest-rate loans minimum-amount blocked-money)
                 (save-customer (an-account id type initial-amount (+ (loan->amount loan) current-amount) 
                                            deadline-month credit-counter (- credit (loan->minimum-credit loan))
-                                           interest-rate loans minimum-amount (+ blocked-money (loan->blocked-amount loan))) customers)
+                                           interest-rate (cons (a-loan-state month-number (loan->id loan) (loan->amount loan) #f) loans) 
+                                           minimum-amount (+ blocked-money (loan->blocked-amount loan))) customers)
               )
             )
           )
@@ -214,8 +215,8 @@
       (cases Command command
         (time-command ()
           (begin
-            (set! month-number (+ month-number 1))
             (do-tasks)
+            (set! month-number (+ month-number 1))
           )
         )
         (new-account-command (customer-id account-type initial-balance)
@@ -542,7 +543,7 @@
                   (pretty-display "Customer has no loan to withdraw.")
                   (pretty-display command)
                 )
-                
+                ; TODO
               )
             )
           )
