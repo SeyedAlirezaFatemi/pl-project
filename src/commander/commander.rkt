@@ -306,12 +306,12 @@
         (let ([current-customer (car customers)])
           (cases Customer current-customer
             (a-customer (id type initial-amount current-amount
-                        deadline-month credit-counter credit
-                        interest-rate loans minimum-amount blocked-money creation-time)
-              (if (> month-number deadline-month)
-                #t ; Done
+                         deadline-month credit-counter credit
+                         interest-rate loans minimum-amount blocked-money creation-time)
+              (if (and (> month-number deadline-month) (account->has-interest (get-account-type type account-types)))
+                #t ; Next
                 (let* ([interest (calculate-interest interest-rate minimum-amount (account->monthly (get-account-type type account-types)))]
-                      [monthly (account->monthly (get-account-type type account-types))])
+                       [monthly (account->monthly (get-account-type type account-types))])
                   (if monthly
                     (save-customer (a-customer id type initial-amount (+ interest current-amount)
                                                 deadline-month credit-counter credit
@@ -328,7 +328,7 @@
                         (pretty-display interest)
                         (pretty-display "^^^^^^^^^^")
                       )
-                      #t ; Done  
+                      #t ; Next  
                     )
                   )
                 )
@@ -378,6 +378,43 @@
   )
 )
 
+(define update-interests
+  (lambda (month-number customers)
+    (if (null? customers)
+      #t ; Done
+      (begin
+        (let ([current-customer (car customers)])
+          (cases Customer current-customer
+            (a-customer (id type initial-amount current-amount
+                        deadline-month credit-counter credit
+                        interest-rate loans minimum-amount blocked-money creation-time)
+              (if (and (= 0 (modulo (- month-number creation-time) span-for-increase)) (account->has-variable-interest (get-account-type type account-types)))
+                (if (= 0 (- month-number creation-time))
+                  #t ; Done
+                  (begin
+                    (save-customer (a-customer id type initial-amount current-amount
+                                               deadline-month credit-counter credit
+                                               (+ interest-rate (account->increase-rate (get-account-type type account-types)))
+                                               loans current-amount blocked-money creation-time))
+                    ; Log
+                    (pretty-display "<><><><><>")
+                    (pretty-display "Update Interests:")
+                    (pretty-display current-customer)
+                    (pretty-display (+ interest-rate (account->increase-rate (get-account-type type account-types))))
+                    (pretty-display "<><><><><>")
+                  )
+                )
+                #t ; Done  
+              )
+            )
+          )
+        )
+        (update-interests month-number (cdr customers))
+      )
+    )
+  )
+)
+
 (define do-command
   (lambda (command)
     (with-handlers ([symbol? (lambda (exn) (begin (pretty-display "Exception: ") (pretty-display exn) (newline)))])     ; LOG
@@ -386,6 +423,7 @@
           (begin
             ; Update minimum amount of customers based on monthly or yearly
             (pay-interests month-number customers)
+            (update-interests month-number customers)
             (increase-credits month-number customers)
             (do-tasks tasks)
             (set! month-number (+ month-number 1))
